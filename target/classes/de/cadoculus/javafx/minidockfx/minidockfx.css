@@ -1,0 +1,35 @@
+/*******************************************************************************
+ *                                                                             *
+ * The CSS for MiniDockFX d to dock the content                                *
+ *                                                                             *
+ ******************************************************************************/
+.minidockfx {
+    -mdf-background-color1: white;
+}
+
+.minidockfx-pane {
+    -fx-background-color: -mdf-background-color1;
+}
+
+
+.minidockfx-splitpane {
+    -fx-background-color: -mdf-background-color1;
+}
+
+.minidockfx-splitpane:vertical > .split-pane-divider {
+    #-fx-background-color: transparent;
+    -fx-background-color: red;
+}
+
+.minidockfx-tabbed-dock-pane {
+    -fx-background-color: yellow;
+}
+
+.minidockfx-tabbed-dock-tabpane {
+    -fx-background-color: red;
+}
+
+.minidockfx-splitpane:horizontal > .split-pane-divider {
+    -fx-background-color: transparent;
+}
+

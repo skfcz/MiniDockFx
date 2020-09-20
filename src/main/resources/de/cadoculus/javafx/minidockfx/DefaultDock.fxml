@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="dockPane" styleClass="minidockfx"
+            maxHeight="Infinity" maxWidth="Infinity"
+            prefHeight="1000" prefWidth="1000"
+            minHeight="300" minWidth="400"
+            stylesheets="@minidockfx.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="de.cadoculus.javafx.minidockfx.MiniDockFXPane">
+    <children>
+        <SplitPane fx:id="verticalSplit"
+                   styleClass="minidockfx-splitpane"
+                   orientation="VERTICAL"
+                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <items>
+                <AnchorPane>
+                    <children>
+                        <SplitPane fx:id="horizontalSplit"
+                                   styleClass="minidockfx-splitpane"
+                                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <items>
+                                <fx:include fx:id="left" source="TabbedDock.fxml" />
+                                <fx:include fx:id="center" source="TabbedDock.fxml" />
+                                <fx:include fx:id="right" source="TabbedDock.fxml" />
+                            </items>
+                        </SplitPane>
+                    </children>
+                </AnchorPane>
+                <fx:include fx:id="bottom" source="TabbedDock.fxml" />
+            </items>
+        </SplitPane>
+    </children>
+</AnchorPane>

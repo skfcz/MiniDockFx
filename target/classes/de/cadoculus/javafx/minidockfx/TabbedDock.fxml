@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXTabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.Label?>
+<AnchorPane
+        fx:controller="de.cadoculus.javafx.minidockfx.TabbedDockController"
+        stylesheets="@minidockfx.css"
+        styleClass="minidockfx-tabbed-dock-pane"
+        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+        prefHeight="1000" prefWidth="1000"
+        xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <JFXTabPane
+              fx:id="tabbedDockTabpane"
+              styleClass="minidockfx-tabbed-dock-tabpane"
+              AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" >
+         <tabs>
+            <Tab text="myTab1foo">
+               <Label text="defailt" />
+            </Tab>
+         </tabs>
+      </JFXTabPane>
+   </children>
+</AnchorPane>

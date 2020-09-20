@@ -11,4 +11,24 @@ public class ExampleTabview1 extends AbstractTabbableView {
         content = new Label("content " + name);
 
     }
+
+    @Override
+    public void beforeAdding() {
+        
+    }
+
+    @Override
+    public void afterAdding() {
+
+    }
+
+    @Override
+    public void beforeClose() {
+
+    }
+
+    @Override
+    public void afterClose() {
+
+    }
 }

@@ -50,13 +50,13 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-//        final ExampleTabview1 left = new ExampleTabview1("left");
+        final ExampleTabview1 left = new ExampleTabview1("left");
 //        final ExampleTabview1 left2 = new ExampleTabview1("left2");
 //        final ExampleTabview1 center = new ExampleTabview1("center");
 //        final ExampleTabview1 right = new ExampleTabview1("right");
 //        final ExampleTabview1 bottom = new ExampleTabview1("bottom");
 //
-//        mdf.add(left, MiniDockTabPosition.LEFT);
+        mdf.add(left, MiniDockTabPosition.LEFT);
 //        mdf.add(left2, MiniDockTabPosition.LEFT);
 //        mdf.add(center, MiniDockTabPosition.CENTER);
 //        mdf.add(right, MiniDockTabPosition.RIGHT);

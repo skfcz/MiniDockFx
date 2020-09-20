@@ -6,8 +6,10 @@
 
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.Label?>
-<AnchorPane>
-    <JFXTabPane AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<AnchorPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="de.cadoculus.javafx.minidockfx.TabbedDockController"
+    >
+    <JFXTabPane fx:id="tabPane" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <tabs>
             <Tab text="TabbedDock Tab">
                 <content>

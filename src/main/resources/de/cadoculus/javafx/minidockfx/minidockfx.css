@@ -17,8 +17,7 @@
 }
 
 .minidockfx-splitpane:vertical > .split-pane-divider {
-    #-fx-background-color: transparent;
-    -fx-background-color: red;
+    -fx-background-color: transparent;
 }
 
 .minidockfx-tabbed-dock-pane {

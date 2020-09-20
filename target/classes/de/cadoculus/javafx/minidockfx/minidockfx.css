@@ -4,7 +4,15 @@
  *                                                                             *
  ******************************************************************************/
 .minidockfx {
-    -mdf-background-color1: white;
+    -mdf-background-color0: white;
+    -mdf-background-color1: #fafafa;
+    -mdf-background-color2: #eeeeee;
+    -mdf-background-color3: #bdbdbd;
+    -mdf-background-color4: #616161;
+    -mdf-background-colorA1: #1a237e;
+    -mdf-background-colorA2: #3949ab;
+    -mdf-accent-color1:#ef6c00;
+    -mdf-accent-color2:#689f38;
 }
 
 .minidockfx-pane {
@@ -21,8 +29,12 @@
 }
 
 .minidockfx-tabbed-dock-pane {
-    -fx-background-color: yellow;
+    -fx-effect: dropshadow(three-pass-box, dimgray, 10, 0.25, 0,10);
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 2
 }
+
 
 .minidockfx-tabbed-dock-tabpane {
     -fx-background-color: red;
@@ -32,3 +44,6 @@
     -fx-background-color: transparent;
 }
 
+ExampleTabview1 {
+    -mdf-background-colorA1: grey;
+}

@@ -1,8 +1,9 @@
 package de.cadoculus.javafx.minidockfx;
 
 import com.jfoenix.controls.JFXTabPane;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 
@@ -11,14 +12,14 @@ import java.util.Optional;
 
 public class TabbedDockController {
 
-
     @FXML
     private JFXTabPane tabPane;
 
     @FXML
     public void initialize() {
-
     }
+
+    final ObservableList<AbstractTabbableView> views = FXCollections.observableArrayList();
 
     public void add(AbstractTabbableView view) {
 
@@ -35,16 +36,16 @@ public class TabbedDockController {
 
         // try to find close button and add event handler
         final Optional<Button> closeO = view.getTab().getChildren().stream().filter(c -> c instanceof Button).
-                map( Button.class::cast).
+                map(Button.class::cast).
                 filter(c -> c.getStyleClass().contains(AbstractTabbableView.CLOSE_BUTTON_STYLE)).
                 findFirst();
-        if ( closeO.isPresent()) {
+        if (closeO.isPresent()) {
             closeO.get().setOnAction(actionEvent -> TabbedDockController.this.remove(view));
         }
 
         tabPane.getTabs().add(tab);
-
         view.afterAdding();
+        views.add( view);
     }
 
     public void remove(AbstractTabbableView view) {
@@ -58,8 +59,9 @@ public class TabbedDockController {
         }
 
         view.beforeClose();
-        tabPane.getTabs().remove( first.get());
+        tabPane.getTabs().remove(first.get());
         view.afterClose();
+        views.remove(view);
 
     }
 }

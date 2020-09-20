@@ -1,5 +1,8 @@
 package de.cadoculus.javafx.minidockfx.demo;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import de.cadoculus.javafx.minidockfx.MiniDockFXPane;
 import de.cadoculus.javafx.minidockfx.MiniDockTabPosition;
 import javafx.application.Application;
@@ -7,6 +10,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -15,6 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.fxml.FXMLLoader;
+
+import java.net.URL;
+import java.time.LocalTime;
 
 public class Main extends Application {
 
@@ -33,7 +42,12 @@ public class Main extends Application {
         });
 
         BorderPane root = new BorderPane();
-        MiniDockFXPane mdf = null;
+
+        MenuBar menubar = new MenuBar();
+        root.setTop(menubar);
+
+
+        final MiniDockFXPane mdf;
         try {
             FXMLLoader loader = new FXMLLoader(MiniDockFXPane.class.getResource("DefaultDock.fxml"));
             AnchorPane ap = loader.load();
@@ -42,7 +56,21 @@ public class Main extends Application {
             root.setCenter(ap);
         } catch (Exception exp) {
             LOG.error("failed to load fxml", exp);
+            throw new IllegalStateException("failed to load MiniDockFXPane");
         }
+
+        Menu menu = new Menu("Tabs");
+        menubar.getMenus().add(menu);
+
+        for (MiniDockTabPosition pos : MiniDockTabPosition.values()) {
+            MenuItem mi = new MenuItem("add to " + pos);
+            menu.getItems().add(mi);
+            mi.setOnAction(actionEvent -> {
+                ExampleTabview1 etv = new ExampleTabview1("Tab " + pos + " " + LocalTime.now());
+                mdf.add(etv, pos);
+            });
+        }
+
 
         Scene scene = new Scene(root, 600, 500);
 
@@ -51,20 +79,43 @@ public class Main extends Application {
         primaryStage.show();
 
         final ExampleTabview1 left = new ExampleTabview1("left");
-//        final ExampleTabview1 left2 = new ExampleTabview1("left2");
-//        final ExampleTabview1 center = new ExampleTabview1("center");
+        final ExampleTabview1 left2 = new ExampleTabview1("left2");
+        final ExampleTabview1 center = new ExampleTabview1("center");
 //        final ExampleTabview1 right = new ExampleTabview1("right");
-//        final ExampleTabview1 bottom = new ExampleTabview1("bottom");
+        final ExampleTabview1 bottom = new ExampleTabview1("bottom");
 //
         mdf.add(left, MiniDockTabPosition.LEFT);
-//        mdf.add(left2, MiniDockTabPosition.LEFT);
-//        mdf.add(center, MiniDockTabPosition.CENTER);
+        mdf.add(left2, MiniDockTabPosition.LEFT);
+        mdf.add(center, MiniDockTabPosition.CENTER);
 //        mdf.add(right, MiniDockTabPosition.RIGHT);
-//        mdf.add(bottom, MiniDockTabPosition.BOTTOM);
+        mdf.add(bottom, MiniDockTabPosition.BOTTOM);
 
     }
 
     public static void main(String[] args) {
+
+        // assume SLF4J is bound to logback in the current environment
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        try {
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(context);
+            // Call context.reset() to clear any previous configuration, e.g. default
+            // configuration. For multi-step configuration, omit calling context.reset().
+            context.reset();
+            URL url = Main.class.getClassLoader().getResource("logback.xml");
+            System.out.println("url " + url);
+
+            configurator.doConfigure(url);
+
+            LOG.error("test error");
+            LOG.warn("test warn");
+            LOG.info("test info");
+        } catch (JoranException je) {
+
+            // StatusPrinter will handle this
+        }
+
         launch(args);
     }
 }

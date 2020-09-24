@@ -24,6 +24,9 @@ public class MiniDockFXPane {
     private SplitPane horizontalSplit;
 
     @FXML
+    private AnchorPane top;
+
+    @FXML
     private AnchorPane left;
 
     @FXML
@@ -44,13 +47,14 @@ public class MiniDockFXPane {
     @FXML
     private TabbedDockController bottomController;
 
+    private double lastVerticalSplit = 0.0;
+    private double lastHorizontalSplit0 = 0.15;
+    private double lastHorizontalSplit1 = 0.85;
+
     @FXML
     public void initialize() {
-
-        LOG.info("initialize");
-
         ListChangeListener lcl = change -> {
-            updateDividers();
+            updateLayout();
         };
 
         leftController.views.addListener(lcl);
@@ -66,55 +70,149 @@ public class MiniDockFXPane {
         });
 
         for (SplitPane.Divider divider : verticalSplit.getDividers()) {
-            divider.positionProperty().addListener((v, o,n) -> dividersChanged());
+            divider.positionProperty().addListener((v, o, n) -> dividersChanged());
         }
         for (SplitPane.Divider divider : horizontalSplit.getDividers()) {
-            divider.positionProperty().addListener((v, o,n) -> dividersChanged());
+            divider.positionProperty().addListener((v, o, n) -> dividersChanged());
         }
-
-
     }
 
     private void dividersChanged() {
-        LOG.info("dividers changed {}");
+
+        double[] pos = verticalSplit.getDividerPositions();
+        if (pos.length > 0) {
+            lastVerticalSplit = pos[0];
+        }
+        pos = horizontalSplit.getDividerPositions();
+        if (pos.length > 0) {
+            lastHorizontalSplit0 = pos[0];
+            if (pos.length > 1) {
+                lastHorizontalSplit1 = pos[1];
+            }
+        }
     }
 
     private void sizeChanged() {
-        LOG.info("size changed {} {}", dockPane.getWidth(), dockPane.getHeight());
+
+        debugInfo("sizeChange");
+
+        // vertical split
+        if (verticalSplit.getItems().size() == 1) {
+            if (verticalSplit.getItems().contains(bottom)) {
+                verticalSplit.setDividerPositions(0.0);
+            } else {
+                verticalSplit.setDividerPositions(1.0);
+            }
+        }
+        debugInfo("finished sizeChange");
+
     }
 
-    private void updateDividers() {
-        LOG.info("updateDividers");
+    private void debugInfo(String msg) {
 
-        boolean needTopRow = false;
-        boolean needBottomRow = false;
-
+        LOG.info(msg);
         LOG.info("left #{}, center #{}, right #{}, bottom #{}",
                 leftController.views.size(),
                 centerController.views.size(),
                 rightController.views.size(),
                 bottomController.views.size());
+
+        LOG.info("verticalSplit {}", verticalSplit.getItems());
+        LOG.info("horizontalSplit {}", horizontalSplit.getItems());
+
         LOG.info("horizontal {}, vertical {}",
                 Arrays.toString(horizontalSplit.getDividerPositions()),
                 Arrays.toString(verticalSplit.getDividerPositions()));
 
-
-        // check vertically
-        boolean needFirstRow = !(leftController.views.isEmpty() && centerController.views.isEmpty() && rightController.views.isEmpty());
-        boolean needSecondRow = !bottomController.views.isEmpty();
-
-        if (needFirstRow && needSecondRow) {
-            // devider must be somewhere between 5 and 95%
-            double vpos = verticalSplit.getDividerPositions()[0];
-            if (vpos < 0.05 || vpos > 0.95) {
-                verticalSplit.setDividerPosition(0, 0.8);
-            }
-        } else {
-            verticalSplit.setDividerPosition(0, needFirstRow ? 1.0 : 0.0);
-        }
+        LOG.info("lastVerticalSplit {}", lastVerticalSplit);
+        LOG.info("lastHorizontal {} {}",lastHorizontalSplit0, lastHorizontalSplit1);
 
 
     }
+
+    private void updateLayout() {
+
+        debugInfo("updateLayout");
+
+        // check what subcontrols are needed
+        boolean needLeft = !leftController.views.isEmpty();
+        boolean needCenter = !centerController.views.isEmpty();
+        boolean needRight = !rightController.views.isEmpty();
+        boolean needFirstRow = needLeft || needCenter || needRight;
+        boolean needSecondRow = !bottomController.views.isEmpty();
+
+        double vpos = verticalSplit.getDividerPositions().length > 0 ? verticalSplit.getDividerPositions()[0] : 10;
+        double tvpos = Math.min(lastVerticalSplit, vpos);
+
+        // Care about vertical layout
+        verticalSplit.getItems().clear();
+        if (needFirstRow) {
+            verticalSplit.getItems().add(top);
+        }
+        if (needSecondRow) {
+            verticalSplit.getItems().add(bottom);
+        }
+
+        if (needFirstRow && needSecondRow) {
+            // Cap the value somehow
+            tvpos = Math.max(0.15, tvpos);
+            tvpos = Math.min(0.85, tvpos);
+
+        } else if (needFirstRow) {
+            tvpos = 1.0;
+        } else if (needSecondRow) {
+            tvpos = 0.0;
+        }
+        verticalSplit.setDividerPositions(tvpos);
+
+        // Care about horizontal layout
+        double hpos0 = horizontalSplit.getDividerPositions().length > 0 ? horizontalSplit.getDividerPositions()[0] : 10.0;
+        double thpos0 = Math.min( hpos0, lastHorizontalSplit0);
+        double hpos1 = horizontalSplit.getDividerPositions().length > 1 ? horizontalSplit.getDividerPositions()[1] : 10.0;
+        double thpos1 = Math.max( thpos0, Math.min( hpos1, lastHorizontalSplit1));
+
+        horizontalSplit.getItems().clear();
+        if (needLeft) {
+            horizontalSplit.getItems().add(left);
+        }
+        if (needCenter) {
+            horizontalSplit.getItems().add(center);
+        }
+        if (needRight) {
+            horizontalSplit.getItems().add(right);
+        }
+        if (needLeft && needCenter && needRight) {
+            thpos0 = Math.min(thpos0, 0.1);
+            thpos0 = Math.max(thpos0, 1.0 / 3);
+            thpos1 = Math.min(thpos1, 2.0 / 3);
+            thpos1 = Math.max(thpos1, 0.9);
+        } else if (needLeft && needCenter) {
+            thpos0 = Math.min(thpos0, 0.1);
+            thpos0 = Math.max(thpos0, 1.0 / 3);
+            thpos1 = 1.0;
+        } else if (needLeft && needRight) {
+            thpos0 = Math.min(thpos0, 1.0 / 3);
+            thpos0 = Math.max(thpos0, 2.0 / 3);
+            thpos1 = 1.0;
+        } else if (needCenter && needRight) {
+            thpos0 = Math.min(thpos0, 1.0 / 3);
+            thpos0 = Math.max(thpos0, 2.0 / 3);
+        } else {
+            thpos0 = thpos1 = 1.0;
+        }
+        horizontalSplit.setDividerPositions(thpos0, thpos1);
+
+        for (SplitPane.Divider divider : verticalSplit.getDividers()) {
+            divider.positionProperty().addListener((v, o, n) -> dividersChanged());
+        }
+        for (SplitPane.Divider divider : horizontalSplit.getDividers()) {
+            divider.positionProperty().addListener((v, o, n) -> dividersChanged());
+        }
+
+        debugInfo("finish updateDividers");
+
+    }
+
 
     public void add(AbstractTabbableView view, MiniDockTabPosition... positions) {
         if (view == null) {

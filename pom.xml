@@ -39,23 +39,37 @@
             <version>9.0.10</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.kordamp.ikonli/ikonli-fontawesome5-pack -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-fontawesome-pack</artifactId>
+            <version>11.5.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.kordamp.ikonli/ikonli-javafx -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-javafx</artifactId>
+            <version>11.5.0</version>
+        </dependency>
+
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
             <version>1.2.3</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.30</version>
-            <scope>test</scope>
-        </dependency>
+
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.29</version>
         </dependency>
 
 

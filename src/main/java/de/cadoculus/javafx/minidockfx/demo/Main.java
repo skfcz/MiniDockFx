@@ -63,6 +63,9 @@ public class Main extends Application {
         menubar.getMenus().add(menu);
 
         for (MiniDockTabPosition pos : MiniDockTabPosition.values()) {
+            if ( MiniDockTabPosition.PREFERENCES == pos) {
+                continue;
+            }
             MenuItem mi = new MenuItem("add to " + pos);
             menu.getItems().add(mi);
             mi.setOnAction(actionEvent -> {

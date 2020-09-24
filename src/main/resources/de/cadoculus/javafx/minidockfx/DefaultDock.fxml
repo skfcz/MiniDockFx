@@ -3,22 +3,28 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="dockPane" maxHeight="Infinity" maxWidth="Infinity" minHeight="300" minWidth="400" styleClass="minidockfx" stylesheets="@minidockfx.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cadoculus.javafx.minidockfx.MiniDockFXPane">
+<AnchorPane fx:id="dockPane" maxHeight="Infinity" maxWidth="Infinity" minHeight="300" minWidth="400"
+            styleClass="minidockfx" stylesheets="@minidockfx.css" xmlns="http://javafx.com/javafx/11.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cadoculus.javafx.minidockfx.MiniDockFXPane">
     <children>
-        <SplitPane fx:id="verticalSplit" dividerPositions="0.5" orientation="VERTICAL" styleClass="minidockfx-splitpane" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <SplitPane fx:id="verticalSplit" dividerPositions="0.5" orientation="VERTICAL" styleClass="minidockfx-splitpane"
+                   AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0">
             <items>
-                <AnchorPane>
+                <AnchorPane fx:id="top">
                     <children>
-                        <SplitPane fx:id="horizontalSplit" dividerPositions="0.2929936305732484, 0.6910828025477707" styleClass="minidockfx-splitpane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <items>
-                         <fx:include fx:id="left" source="TabbedDock.fxml" />
-                         <fx:include fx:id="center" source="TabbedDock.fxml" />
-                         <fx:include fx:id="right" source="TabbedDock.fxml" />
-                     </items>
+                        <SplitPane fx:id="horizontalSplit" dividerPositions="0.2929936305732484, 0.6910828025477707"
+                                   styleClass="minidockfx-splitpane" AnchorPane.bottomAnchor="0.0"
+                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <items>
+                                <fx:include fx:id="left" source="TabbedDock.fxml"/>
+                                <fx:include fx:id="center" source="TabbedDock.fxml"/>
+                                <fx:include fx:id="right" source="TabbedDock.fxml"/>
+                            </items>
                         </SplitPane>
                     </children>
                 </AnchorPane>
-                <fx:include fx:id="bottom" source="TabbedDock.fxml" />
+                <fx:include fx:id="bottom" source="TabbedDock.fxml"/>
             </items>
         </SplitPane>
     </children>

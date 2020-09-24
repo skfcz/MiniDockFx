@@ -44,6 +44,31 @@
     -fx-background-color: transparent;
 }
 
+.minidockfx-tab-box {
+
+}
+.minidockfx-tab-label {
+    -fx-text-fill: WHITE;
+    -fx-font-size: 24px;
+}
+
+.minidockfx-tab-close {
+    -jfx-button-type: FLAT;
+    -fx-background-color: transparent;
+    -fx-pref-width: 32px;
+}
+
+.minidockfx-tab-close .ikonli-font-icon {
+    -fx-fill: WHITE;
+    -fx-icon-size: 32px;
+}
+
+.minidockfx-tab-close:hover .ikonli-font-icon {
+    -fx-fill:#ef6c00;
+}
+
+
+
 ExampleTabview1 {
     -mdf-background-colorA1: grey;
 }

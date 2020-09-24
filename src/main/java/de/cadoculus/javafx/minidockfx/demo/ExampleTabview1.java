@@ -17,7 +17,7 @@ public class ExampleTabview1 extends AbstractTabbableView {
         super(name, true, true);
         content = new BorderPane();
 
-        content.setBackground(new Background(new BackgroundFill(Color.GOLDENROD,
+        content.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY,
                 CornerRadii.EMPTY, Insets.EMPTY)));
 
         content.getStyleClass().add("exampleTabview1");

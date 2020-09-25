@@ -71,6 +71,11 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.29</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>14</version>
+        </dependency>
 
 
     </dependencies>

@@ -15,6 +15,9 @@
     -mdf-accent-color2:#689f38;
 }
 
+
+
+
 .minidockfx-pane {
     -fx-background-color: -mdf-background-color1;
 }
@@ -67,6 +70,23 @@
     -fx-fill:#ef6c00;
 }
 
+
+
+/*
+* This just overwrites the
+ */
+
+/* https://github.com/jfoenixadmin/JFoenix/blob/ca340d0ce3a4ce8379f7ebb6aa58cf9e35de5168/jfoenix/src/main/resources/com/jfoenix/assets/css/controls/jfx-tab-pane.css */
+.jfx-tab-pane .tab-header-background {
+    -fx-background-color: -mdf-background-colorA2;
+}
+.jfx-tab-pane .headers-region > .tab-selected-line{
+    -fx-pref-width: 1px !important;
+    -fx-pref-height: 3px;
+}
+.jfx-tab-pane .headers-region .tab-selected-line {
+    -fx-background-color: -mdf-accent-color1;
+}
 
 
 ExampleTabview1 {

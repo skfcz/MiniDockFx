@@ -65,6 +65,7 @@ public class TabbedDockController {
         view.afterAdding();
         views.add(view);
 
+        LOG.info("mouse listener {}", tab.getGraphic().getOnMousePressed());
 
         // Add mouse event handlers for the source
         tab.getGraphic().setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -74,6 +75,9 @@ public class TabbedDockController {
                 dock.dragStart(view, event);
             }
         });
+
+
+        LOG.info("mouse listener' {}", tab.getGraphic().getOnMousePressed());
 
         tab.getGraphic().setOnMouseReleased(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {

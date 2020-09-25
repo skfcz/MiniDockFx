@@ -90,27 +90,29 @@
 
 .minidockfx-drag-target {
 
+     -fx-background-color: rgba(255, 255, 255, 0.5); // transparent #bdbdbd
+
     /* -fx-border-color: rgba(255, 255, 255,0.75); // transparent white
     -fx-border-width: 5px; */
-    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.5) , 10, 0.0 , 0 , 3 );
+    //-fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.5) , 10, 0.0 , 0 , 3 );
 }
 .minidockfx-drag-sub-target {
 
-    -fx-background-color: rgba(238, 238, 238, .5); // transparent #bdbdbd
-    -fx-border-width: 5;
-    -fx-border-color: rgba(255, 255, 255,0.75); // transparent white
+    // -fx-background-color: rgba(255, 255, 255, .8); // transparent #bdbdbd
+    -fx-border-width: 3;
+    -fx-background-insets: 20 20 20 20 ;
+    -fx-border-color: rgba(255, 255, 255,0.9); // transparent white
     -fx-alignment: center;
 }
 
 .minidockfx-drag-sub-target_active {
     -fx-background-color: rgba(238, 238, 238, .9); // transparent #bdbdbd
-    -fx-border-width: 5;
+    -fx-border-width: 3;
     -fx-border-color: #ef6c00;
 }
 
-.minidockfx-drag-sub-target:hover {
-    -fx-border-width: 5;
-    -fx-border-color: #ef6c00;
+.minidockfx-drag-sub-ripple {
+    -jfx-rippler-fill: #ef6c00;
 }
 
 /*

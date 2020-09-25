@@ -1,16 +1,20 @@
 package de.cadoculus.javafx.minidockfx;
 
 
+import com.jfoenix.controls.JFXRippler;
+import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
-import javafx.scene.input.*;
+import javafx.scene.input.MouseDragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.transform.Transform;
+import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +102,109 @@ public class MiniDockFXPane {
             trgt.setOnMouseDragExited(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
         }
 
+    }
+
+
+    /**
+     * Add a view to the docking panel
+     *
+     * @param view      the view to add
+     * @param positions the desired positions. If no positon is given puts view to CENTER
+     * @throws IllegalArgumentException in case of null view or if view was already added
+     */
+    public void add(AbstractTabbableView view, MiniDockTabPosition... positions) {
+        if (view == null) {
+            throw new IllegalArgumentException("expect none null view");
+        }
+        if (view.getContent() == null) {
+            throw new IllegalArgumentException("no content found in view, you need to provide a content in " + view.getClass());
+        }
+        if (leftController.views.contains(view)) {
+            throw new IllegalArgumentException("found view " + view + " already docked on left side");
+        } else if (centerController.views.contains(view)) {
+            throw new IllegalArgumentException("found view " + view + " already docked on center");
+        } else if (rightController.views.contains(view)) {
+            throw new IllegalArgumentException("found view " + view + " already docked on right side");
+        } else if (bottomController.views.contains(view)) {
+            throw new IllegalArgumentException("found view " + view + " already docked on bottom");
+        }
+
+        MiniDockTabPosition pos = MiniDockTabPosition.CENTER;
+        if (positions != null) {
+            for (int i = 0; i < positions.length; i++) {
+                MiniDockTabPosition check = positions[i];
+                switch (check) {
+                    case LEFT:
+                    case CENTER:
+                    case RIGHT:
+                    case BOTTOM:
+                        pos = check;
+                        break;
+                    case PREFERENCES:
+                        LOG.info("position preferences not implemented yet");
+                        continue;
+                    default:
+                        LOG.error("got unsupported position value {}", check);
+                }
+            }
+        }
+
+        TabbedDockController tbc = null;
+        switch (pos) {
+            case LEFT:
+                tbc = leftController;
+                break;
+            case CENTER:
+                tbc = centerController;
+                break;
+            case RIGHT:
+                tbc = rightController;
+                break;
+            case BOTTOM:
+                tbc = bottomController;
+                break;
+        }
+
+        tbc.add(view);
+        tbc.raise(view);
+    }
+
+    /**
+     * Remove the given view from the docking panel.
+     *
+     * @param view the view to remove
+     * @throws IllegalArgumentException in case of a null view or one which is not managed by the dock
+     */
+    public void remove(AbstractTabbableView view) {
+        if (view == null) {
+            throw new IllegalArgumentException("expect none null view");
+        }
+        if (leftController.views.contains(view)) {
+            leftController.remove(view);
+        } else if (centerController.views.contains(view)) {
+            centerController.remove(view);
+        } else if (rightController.views.contains(view)) {
+            rightController.remove(view);
+        } else if (bottomController.views.contains(view)) {
+            bottomController.remove(view);
+        } else {
+            throw new IllegalArgumentException("view " + view + " is not managed in docking panel");
+        }
+    }
+
+    /**
+     * Move the given view from the current position to a new one
+     *
+     * @param view     the view to move
+     * @param position the target position
+     * @throws IllegalArgumentException in case of a null view or one which is not managed by the dock
+     */
+    public void move(AbstractTabbableView view, MiniDockTabPosition position) {
+        if (view == null) {
+            throw new IllegalArgumentException("expect none null view");
+        }
+        remove(view);
+        add(view, position);
     }
 
 
@@ -239,64 +346,6 @@ public class MiniDockFXPane {
     }
 
 
-    public void add(AbstractTabbableView view, MiniDockTabPosition... positions) {
-        if (view == null) {
-            throw new IllegalArgumentException("expect none null view");
-        }
-        if (view.getContent() == null) {
-            throw new IllegalArgumentException("no content found in view, you need to provide a content in " + view.getClass());
-        }
-        if (leftController.views.contains(view)) {
-            throw new IllegalArgumentException("found view " + view + " already docked on left side");
-        } else if (centerController.views.contains(view)) {
-            throw new IllegalArgumentException("found view " + view + " already docked on center");
-        } else if (rightController.views.contains(view)) {
-            throw new IllegalArgumentException("found view " + view + " already docked on right side");
-        } else if (bottomController.views.contains(view)) {
-            throw new IllegalArgumentException("found view " + view + " already docked on bottom");
-        }
-
-        MiniDockTabPosition pos = MiniDockTabPosition.CENTER;
-        if (positions != null) {
-            for (int i = 0; i < positions.length; i++) {
-                MiniDockTabPosition check = positions[i];
-                switch (check) {
-                    case LEFT:
-                    case CENTER:
-                    case RIGHT:
-                    case BOTTOM:
-                        pos = check;
-                        break;
-                    case PREFERENCES:
-                        LOG.info("position preferences not implemented yet");
-                        continue;
-                    default:
-                        LOG.error("got unsupported position value {}", check);
-                }
-            }
-        }
-
-        TabbedDockController tbc = null;
-        switch (pos) {
-            case LEFT:
-                tbc = leftController;
-                break;
-            case CENTER:
-                tbc = centerController;
-                break;
-            case RIGHT:
-                tbc = rightController;
-                break;
-            case BOTTOM:
-                tbc = bottomController;
-                break;
-        }
-
-        tbc.add(view);
-        tbc.raise(view);
-    }
-
-
     void dragStart(AbstractTabbableView view, MouseEvent event) {
 
 //        LOG.info("dragPressed {}", view.name.get());
@@ -351,13 +400,30 @@ public class MiniDockFXPane {
 
 
         } else if (MouseEvent.MOUSE_RELEASED == event.getEventType()) {
-            dragTarget.setVisible(false);
-            dragTarget.toBack();
-            dockPane.setCursor(Cursor.DEFAULT);
-
-
+            finishDragging();
         }
         event.consume();
+    }
+
+    private void finishDragging() {
+        // have a nice fade out for the drag target panel
+        FadeTransition fade = new FadeTransition();
+        fade.setNode(dragTarget);
+        fade.setDuration(Duration.millis(250));
+        fade.setFromValue(10);
+        fade.setToValue(0.1);
+        fade.setCycleCount(1);
+        fade.setAutoReverse(false);
+        fade.setOnFinished(actionEvent -> {
+            dragTarget.setVisible(false);
+            dragTarget.toBack();
+            dragTarget.setOpacity(1);
+            dockPane.setCursor(Cursor.DEFAULT);
+        });
+        fade.play();
+
+
+        dockPane.setCursor(Cursor.DEFAULT);
     }
 
     private void dragEnd(Label trgt, MouseDragEvent mouseDragEvent) {
@@ -369,21 +435,29 @@ public class MiniDockFXPane {
         }
         if (MouseDragEvent.MOUSE_DRAG_ENTERED == mouseDragEvent.getEventType()) {
             dockPane.setCursor(Cursor.HAND);
-            trgt.getStyleClass().add( ACTIVE_DRAG_TRGT);
+            trgt.getStyleClass().add(ACTIVE_DRAG_TRGT);
+
+            if (trgt.getParent() instanceof JFXRippler) {
+                ((JFXRippler) trgt.getParent()).createManualRipple().run();
+            }
+
         } else if (MouseDragEvent.MOUSE_DRAG_EXITED == mouseDragEvent.getEventType()) {
             dockPane.setCursor(Cursor.MOVE);
-            trgt.getStyleClass().remove( ACTIVE_DRAG_TRGT);
+            trgt.getStyleClass().remove(ACTIVE_DRAG_TRGT);
         } else if (MouseDragEvent.MOUSE_DRAG_RELEASED == mouseDragEvent.getEventType()) {
             // we should move the source view
-            trgt.getStyleClass().remove( ACTIVE_DRAG_TRGT);
-            dockPane.setCursor(Cursor.DEFAULT);
             LOG.info("move view '{}' to {}", draggedView, trgt.getId());
+
+            trgt.getStyleClass().remove(ACTIVE_DRAG_TRGT);
+            finishDragging();
+            move(draggedView, MiniDockTabPosition.parseFromId(trgt.getId()));
         }
 
 
         LOG.info("style on  {}: {}", trgt.getId(), trgt.getStyleClass());
         mouseDragEvent.consume();
     }
+
 
 }
 

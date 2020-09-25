@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXRippler?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -9,23 +10,33 @@
             styleClass="minidockfx" stylesheets="@minidockfx.css" xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cadoculus.javafx.minidockfx.MiniDockFXPane">
     <children>
-        <BorderPane fx:id="dragTarget" prefWidth="200" prefHeight="150" styleClass="minidockfx-drag-target" visible="true">
+        <BorderPane fx:id="dragTarget" prefHeight="150" prefWidth="200" styleClass="minidockfx-drag-target"
+                    visible="true">
             <left>
-                <Label fx:id="leftDragTarget" maxWidth="1000.0" minWidth="75.0" prefHeight="100.0" prefWidth="75.0"
-                       styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+                <JFXRippler styleClass="minidockfx-drag-sub-ripple">
+                    <Label fx:id="leftDragTarget" maxWidth="1000.0" minWidth="75.0" prefHeight="100.0" prefWidth="75.0"
+                           styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+                </JFXRippler>
             </left>
             <center>
-                <Label fx:id="centerDragTarget" maxWidth="1000.0" minWidth="100.0" prefHeight="100.0" prefWidth="100.0"
-                       styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+                <JFXRippler styleClass="minidockfx-drag-sub-ripple">
+                    <Label fx:id="centerDragTarget" maxWidth="1000.0" minWidth="100.0" prefHeight="100.0"
+                           prefWidth="100.0"
+                           styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+                </JFXRippler>
             </center>
             <right>
-                <Label fx:id="rightDragTarget" maxWidth="1000.0" minWidth="75.0" prefHeight="100.0" prefWidth="75.0"
-                       styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+                <JFXRippler styleClass="minidockfx-drag-sub-ripple">
+                    <Label fx:id="rightDragTarget" maxWidth="1000.0" minWidth="75.0" prefHeight="100.0" prefWidth="75.0"
+                           styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+                </JFXRippler>
             </right>
             <bottom>
-                <Label fx:id="bottomDragTarget" maxWidth="1000.0" minWidth="100.0" prefHeight="50.0" prefWidth="500.0"
-                       styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
-
+                <JFXRippler styleClass="minidockfx-drag-sub-ripple">
+                    <Label fx:id="bottomDragTarget" maxWidth="1000.0" minWidth="100.0" prefHeight="50.0"
+                           prefWidth="500.0"
+                           styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+                </JFXRippler>
             </bottom>
         </BorderPane>
         <SplitPane fx:id="verticalSplit" dividerPositions="0.5" orientation="VERTICAL" styleClass="minidockfx-splitpane"

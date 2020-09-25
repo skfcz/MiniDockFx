@@ -71,28 +71,28 @@ public class TabbedDockController {
             public void handle(MouseEvent event) {
                 tab.getGraphic().setMouseTransparent(true);
                 event.setDragDetect(true);
-                dock.dragPressed(view, event);
+                dock.dragStart(view, event);
             }
         });
 
         tab.getGraphic().setOnMouseReleased(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
                 tab.getGraphic().setMouseTransparent(false);
-                dock.dragPressed(view, event);
+                dock.dragStart(view, event);
             }
         });
 
         tab.getGraphic().setOnMouseDragged(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
                 event.setDragDetect(false);
-                dock.dragPressed(view, event);
+                dock.dragStart(view, event);
             }
         });
 
         tab.getGraphic().setOnDragDetected(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
                 tab.getGraphic().startFullDrag();
-                dock.dragPressed(view, event);
+                dock.dragStart(view, event);
             }
         });
     }

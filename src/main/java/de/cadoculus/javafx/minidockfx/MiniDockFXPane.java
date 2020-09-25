@@ -4,9 +4,10 @@ package de.cadoculus.javafx.minidockfx;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.transform.Transform;
@@ -14,10 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class MiniDockFXPane {
 
     private static final Logger LOG = LoggerFactory.getLogger(MiniDockFXPane.class);
+
+    public static final String ACTIVE_DRAG_TRGT = "minidockfx-drag-sub-target_active";
 
     @FXML
     private AnchorPane dockPane;
@@ -62,6 +66,8 @@ public class MiniDockFXPane {
     private double lastHorizontalSplit0 = 0.15;
     private double lastHorizontalSplit1 = 0.85;
 
+    private AbstractTabbableView draggedView;
+
     @FXML
     public void initialize() {
 
@@ -84,7 +90,16 @@ public class MiniDockFXPane {
         for (SplitPane.Divider divider : horizontalSplit.getDividers()) {
             divider.positionProperty().addListener((v, o, n) -> dividersChanged());
         }
+
+        for (Label trgt : List.of(leftDragTarget, centerDragTarget, rightDragTarget, bottomDragTarget)) {
+            trgt.setOnMouseDragEntered(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
+            trgt.setOnMouseDragOver(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
+            trgt.setOnMouseDragReleased(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
+            trgt.setOnMouseDragExited(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
+        }
+
     }
+
 
     private void dividersChanged() {
 
@@ -282,24 +297,29 @@ public class MiniDockFXPane {
     }
 
 
-    void dragPressed(AbstractTabbableView view, MouseEvent event) {
+    void dragStart(AbstractTabbableView view, MouseEvent event) {
 
-        LOG.info("dragPressed {}", view.name.get());
-        LOG.info("    {}/{} {}", event.getSceneX(), event.getSceneY(), event.getEventType());
-        LOG.info("    {}/{} {}", dockPane.getLayoutX(), dockPane.getLayoutY(), dockPane.getLayoutBounds());
+//        LOG.info("dragPressed {}", view.name.get());
+//        LOG.info("    {}/{} {}", event.getSceneX(), event.getSceneY(), event.getEventType());
+//        LOG.info("    {}/{} {}", dockPane.getLayoutX(), dockPane.getLayoutY(), dockPane.getLayoutBounds());
 
-        LOG.info("dockPane children {}", dockPane.getChildren());
+        draggedView = view;
+
+//        LOG.info("dockPane children {}", dockPane.getChildren());
 
         if (MouseEvent.DRAG_DETECTED == event.getEventType()) {
+
             // make the drag target visible
             dragTarget.setVisible(true);
             dragTarget.toFront();
+
+            dockPane.setCursor(Cursor.MOVE);
 
             // and position it in the vicinity of the mouse
             //     1. fallback position in the middle of the dock
             final Bounds dtBounds = dragTarget.getBoundsInLocal();
             final Bounds dkBounds = dockPane.getBoundsInLocal();
-            LOG.info("    bounds {} {}", dkBounds, dtBounds);
+            //LOG.info("    bounds {} {}", dkBounds, dtBounds);
 
             double lx = (dkBounds.getWidth() - dtBounds.getWidth()) / 2.0;
             double ly = (dkBounds.getHeight() - dtBounds.getHeight()) / 2.0;
@@ -308,19 +328,18 @@ public class MiniDockFXPane {
             try {
                 final Transform localToSceneTransform = dockPane.getLocalToSceneTransform();
                 final Point2D mouseInLocal = localToSceneTransform.inverseTransform(event.getSceneX(), event.getSceneY());
-                LOG.info("    mouse in local  {}", mouseInLocal);
 
                 // Horizontal
                 // place the drag target middle where the mouse it,
                 // but keep at lest 10px distance to the edge of the dock
-                lx = Math.max(10, mouseInLocal.getX() - dtBounds.getWidth() / 2.0);
-                lx = Math.min(lx, dkBounds.getWidth() - 10 - dtBounds.getWidth());
+                lx = Math.max(30, mouseInLocal.getX() - dtBounds.getWidth() / 2.0);
+                lx = Math.min(lx, dkBounds.getWidth() - 30 - dtBounds.getWidth());
 
                 // Vertical
                 // place the drag target below the mouse unless there is not enough space
-                ly = mouseInLocal.getY() + 25;
-                if (( ly + dtBounds.getHeight() + 10 ) > dkBounds.getHeight()) {
-                    ly = mouseInLocal.getY() - 25 - dtBounds.getHeight();
+                ly = mouseInLocal.getY() + 30;
+                if ((ly + dtBounds.getHeight() + 30) > dkBounds.getHeight()) {
+                    ly = mouseInLocal.getY() - 30 - dtBounds.getHeight();
                 }
 
             } catch (Exception exp) {
@@ -330,12 +349,41 @@ public class MiniDockFXPane {
             dragTarget.setLayoutX(lx);
             dragTarget.setLayoutY(ly);
 
+
         } else if (MouseEvent.MOUSE_RELEASED == event.getEventType()) {
             dragTarget.setVisible(false);
             dragTarget.toBack();
+            dockPane.setCursor(Cursor.DEFAULT);
+
+
+        }
+        event.consume();
+    }
+
+    private void dragEnd(Label trgt, MouseDragEvent mouseDragEvent) {
+        LOG.info("dragEnd {} {}", trgt.getId(), mouseDragEvent.getEventType());
+
+        if (draggedView == null) {
+            LOG.error("something is wrong, got dragEnd, but have no draggedView value ???");
+            return;
+        }
+        if (MouseDragEvent.MOUSE_DRAG_ENTERED == mouseDragEvent.getEventType()) {
+            dockPane.setCursor(Cursor.HAND);
+            trgt.getStyleClass().add( ACTIVE_DRAG_TRGT);
+        } else if (MouseDragEvent.MOUSE_DRAG_EXITED == mouseDragEvent.getEventType()) {
+            dockPane.setCursor(Cursor.MOVE);
+            trgt.getStyleClass().remove( ACTIVE_DRAG_TRGT);
+        } else if (MouseDragEvent.MOUSE_DRAG_RELEASED == mouseDragEvent.getEventType()) {
+            // we should move the source view
+            trgt.getStyleClass().remove( ACTIVE_DRAG_TRGT);
+            dockPane.setCursor(Cursor.DEFAULT);
+            LOG.info("move view '{}' to {}", draggedView, trgt.getId());
         }
 
 
+        LOG.info("style on  {}: {}", trgt.getId(), trgt.getStyleClass());
+        mouseDragEvent.consume();
     }
+
 }
 

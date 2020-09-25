@@ -3,7 +3,7 @@
  * The CSS for MiniDockFX d to dock the content                                *
  *                                                                             *
  ******************************************************************************/
-.minidockfx {
+.root {
     -mdf-background-color0: white;
     -mdf-background-color1: #fafafa;
     -mdf-background-color2: #eeeeee;
@@ -13,6 +13,8 @@
     -mdf-background-colorA2: #3949ab;
     -mdf-accent-color1:#ef6c00;
     -mdf-accent-color2:#689f38;
+
+    -fx-font-size: 24px;
 }
 
 
@@ -25,6 +27,7 @@
 
 .minidockfx-splitpane {
     -fx-background-color: -mdf-background-color1;
+    -fx-padding: 5;
 }
 
 .minidockfx-splitpane:vertical > .split-pane-divider {
@@ -32,15 +35,14 @@
 }
 
 .minidockfx-tabbed-dock-pane {
-    -fx-effect: dropshadow(three-pass-box, dimgray, 10, 0.25, 0,10);
+    -fx-effect: dropshadow(three-pass-box, #bdbdbd, 3, 0.25, 0,5);
     -fx-background-insets: 0;
     -fx-background-radius: 0;
-    -fx-padding: 2
+    -fx-padding: 4
 }
 
-
 .minidockfx-tabbed-dock-tabpane {
-    -fx-background-color: red;
+
 }
 
 .minidockfx-splitpane:horizontal > .split-pane-divider {
@@ -52,7 +54,23 @@
 }
 .minidockfx-tab-label {
     -fx-text-fill: WHITE;
-    -fx-font-size: 24px;
+    -fx-max-width: 100px;
+}
+
+.minidockfx-tab-label-tooltip {
+    -fx-background:-mdf-background-color0;
+    -fx-background-color:-mdf-background-color0;
+    -fx-border-color: -mdf-background-color2;
+    -fx-text-fill: black;
+
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0;
+    -fx-padding: 0.667em 0.75em 0.667em 0.75em; /* 10px */
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.5) , 10, 0.0 , 0 , 3 );
+    -fx-font-size: 16px;
+}
+.minidockfx-tab-label-tooltip  .label {
+    -fx-text-fill: black;
 }
 
 .minidockfx-tab-close {
@@ -70,11 +88,56 @@
     -fx-fill:#ef6c00;
 }
 
+.minidockfx-drag-target {
+    -fx-background-color: RED;
+    -fx-border-color: #bdbdbd;
+    -fx-border-width: 5px;
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.5) , 10, 0.0 , 0 , 3 );
+}
+.minidockfx-drag-sub-target {
+    -fx-background-color: #eeeeee;
+    -fx-border-width: 5;
+    -fx-border-color: #bdbdbd;
+    -fx-alignment: center;
+}
 
+
+.minidockfx-drag-sub-target:hover {
+    -fx-border-width: 5;
+    -fx-border-color: #ef6c00;
+}
 
 /*
-* This just overwrites the
+* The following styles are just for the example code
  */
+.menu-bar {
+    -fx-background-color: -mdf-background-colorA2;
+    -fx-effect: dropshadow(three-pass-box, #bdbdbd, 3, 0.25, 0,5);
+    -fx-padding: 0;
+    -fx-margin:5;
+}
+.menu-bar .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10.0px;
+}
+.menu-bar .menu-button:hover, .menu-bar .menu-button:focused, .menu-bar .menu-button:showing {
+    -fx-background: black ;
+    -fx-opacity: 0.1;
+}
+
+.menu-item {
+    -fx-padding: 0.0em 0.0em 0.0em 0.0em;
+    -fx-text-fill: black;
+    -fx-background: darkgray ;
+}
+.menu-item .label{
+    -fx-text-fill: black;
+}
+.menu-item .label:hover{
+    -fx-background: black ;
+    -fx-text-fill: white;
+}
 
 /* https://github.com/jfoenixadmin/JFoenix/blob/ca340d0ce3a4ce8379f7ebb6aa58cf9e35de5168/jfoenix/src/main/resources/com/jfoenix/assets/css/controls/jfx-tab-pane.css */
 .jfx-tab-pane .tab-header-background {

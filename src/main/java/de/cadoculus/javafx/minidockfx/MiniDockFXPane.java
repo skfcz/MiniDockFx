@@ -1,14 +1,14 @@
 package de.cadoculus.javafx.minidockfx;
 
 
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.Duration;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.transform.Transform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,36 +20,42 @@ public class MiniDockFXPane {
 
     @FXML
     private AnchorPane dockPane;
-
+    @FXML
+    private AnchorPane top;
     @FXML
     private SplitPane verticalSplit;
-
     @FXML
     private SplitPane horizontalSplit;
 
-    @FXML
-    private AnchorPane top;
 
     @FXML
     private AnchorPane left;
-
-    @FXML
-    private AnchorPane center;
-
-    @FXML
-    private AnchorPane right;
-
-    @FXML
-    private AnchorPane bottom;
-
     @FXML
     private TabbedDockController leftController;
     @FXML
+    private AnchorPane center;
+    @FXML
     private TabbedDockController centerController;
+    @FXML
+    private AnchorPane right;
     @FXML
     private TabbedDockController rightController;
     @FXML
+    private AnchorPane bottom;
+    @FXML
     private TabbedDockController bottomController;
+
+    @FXML
+    private BorderPane dragTarget;
+    @FXML
+    private Label leftDragTarget;
+    @FXML
+    private Label centerDragTarget;
+    @FXML
+    private Label rightDragTarget;
+    @FXML
+    private Label bottomDragTarget;
+
 
     private double lastVerticalSplit = 0.0;
     private double lastHorizontalSplit0 = 0.15;
@@ -57,14 +63,12 @@ public class MiniDockFXPane {
 
     @FXML
     public void initialize() {
-        ListChangeListener lcl = change -> {
-            updateLayout();
-        };
 
-        leftController.views.addListener(lcl);
-        centerController.views.addListener(lcl);
-        rightController.views.addListener(lcl);
-        bottomController.views.addListener(lcl);
+        leftController.setDock(this);
+        centerController.setDock(this);
+        rightController.setDock(this);
+        bottomController.setDock(this);
+
 
         dockPane.widthProperty().addListener((v, o, n) -> {
             sizeChanged();
@@ -129,12 +133,12 @@ public class MiniDockFXPane {
                 Arrays.toString(verticalSplit.getDividerPositions()));
 
         LOG.info("lastVerticalSplit {}", lastVerticalSplit);
-        LOG.info("lastHorizontal {} {}",lastHorizontalSplit0, lastHorizontalSplit1);
+        LOG.info("lastHorizontal {} {}", lastHorizontalSplit0, lastHorizontalSplit1);
 
 
     }
 
-    private void updateLayout() {
+    void updateLayout() {
 
         debugInfo("updateLayout");
 
@@ -171,9 +175,9 @@ public class MiniDockFXPane {
 
         // Care about horizontal layout
         double hpos0 = horizontalSplit.getDividerPositions().length > 0 ? horizontalSplit.getDividerPositions()[0] : 10.0;
-        double thpos0 = Math.min( hpos0, lastHorizontalSplit0);
+        double thpos0 = Math.min(hpos0, lastHorizontalSplit0);
         double hpos1 = horizontalSplit.getDividerPositions().length > 1 ? horizontalSplit.getDividerPositions()[1] : 10.0;
-        double thpos1 = Math.max( thpos0, Math.min( hpos1, lastHorizontalSplit1));
+        double thpos1 = Math.max(thpos0, Math.min(hpos1, lastHorizontalSplit1));
 
         horizontalSplit.getItems().clear();
         if (needLeft) {
@@ -214,8 +218,6 @@ public class MiniDockFXPane {
         }
 
         debugInfo("finish updateDividers");
-
-
 
 
     }
@@ -275,8 +277,50 @@ public class MiniDockFXPane {
         }
 
         tbc.add(view);
+        tbc.raise(view);
     }
 
 
+    void dragPressed(AbstractTabbableView view, MouseEvent event) {
+
+        LOG.info("dragPressed {}", view.name.get());
+        LOG.info("    {}/{} {}", event.getSceneX(), event.getSceneY(), event.getEventType());
+        LOG.info("    {}/{} {}", dockPane.getLayoutX(), dockPane.getLayoutY(), dockPane.getLayoutBounds());
+
+
+        try {
+            final Transform localToSceneTransform = dockPane.getLocalToSceneTransform();
+            LOG.info("  i {}", localToSceneTransform.inverseTransform(event.getSceneX(), event.getSceneY()));
+        } catch (Exception exp) {
+            LOG.error("failed to apply conversion", exp);
+        }
+
+
+        LOG.info("dockPane children {}", dockPane.getChildren());
+
+        if (MouseEvent.DRAG_DETECTED == event.getEventType()) {
+            // make the drag target visible
+            dragTarget.setVisible(true);
+            dragTarget.toFront();
+
+            // and position it in the vicinity of the mouse
+            //     1. fallback position in the middle of the dock
+            final Bounds dtBounds = dragTarget.getBoundsInLocal();
+            final Bounds dkBounds = dockPane.getBoundsInLocal();
+            LOG.info("    bounds {} {}",dkBounds, dtBounds);
+
+            double lx = (dkBounds.getWidth() - dtBounds.getWidth())/2.0;
+            double ly = (dkBounds.getHeight() - dtBounds.getHeight())/2.0;
+            dragTarget.setLayoutX(lx);
+            dragTarget.setLayoutY(ly);
+
+
+        } else if (MouseEvent.MOUSE_RELEASED == event.getEventType()) {
+            dragTarget.setVisible(false);
+            dragTarget.toBack();
+        }
+
+
+    }
 }
 

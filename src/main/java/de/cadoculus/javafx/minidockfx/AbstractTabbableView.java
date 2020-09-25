@@ -9,6 +9,7 @@ import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -20,6 +21,7 @@ public abstract class AbstractTabbableView {
     public static final String CLOSE_BUTTON_STYLE = "minidockfx-tab-close";
     public static final String TAB_LABEL_STYLE = "minidockfx-tab-label";
     public static final String TAB_BOX_STYLE = "minidockfx-tab-box";
+    public static final String TAB_LABEL_TT_STYLE = "minidockfx-tab-label-tooltip";
 
     protected final StringProperty name = new SimpleStringProperty();
     protected final HBox tab;
@@ -41,6 +43,14 @@ public abstract class AbstractTabbableView {
         Label label = new Label();
         label.getStyleClass().add(TAB_LABEL_STYLE);
         label.textProperty().bind(this.name);
+
+        // in case the title becomes too long we add a tooltip
+        Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(this.name);
+        tooltip.getStyleClass().add(TAB_LABEL_TT_STYLE);
+        label.setTooltip(tooltip);
+
+
         tab.getChildren().add(label);
 
         JFXButton closeButton = new JFXButton();

@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 
 <AnchorPane fx:id="dockPane" maxHeight="Infinity" maxWidth="Infinity" minHeight="300" minWidth="400"
             styleClass="minidockfx" stylesheets="@minidockfx.css" xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cadoculus.javafx.minidockfx.MiniDockFXPane">
     <children>
+        <BorderPane fx:id="dragTarget" prefWidth="200" prefHeight="150" styleClass="minidockfx-drag-target" visible="true">
+            <left>
+                <Label fx:id="leftDragTarget" maxWidth="1000.0" minWidth="75.0" prefHeight="100.0" prefWidth="75.0"
+                       styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+            </left>
+            <center>
+                <Label fx:id="centerDragTarget" maxWidth="1000.0" minWidth="100.0" prefHeight="100.0" prefWidth="100.0"
+                       styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+            </center>
+            <right>
+                <Label fx:id="rightDragTarget" maxWidth="1000.0" minWidth="75.0" prefHeight="100.0" prefWidth="75.0"
+                       styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+            </right>
+            <bottom>
+                <Label fx:id="bottomDragTarget" maxWidth="1000.0" minWidth="100.0" prefHeight="50.0" prefWidth="500.0"
+                       styleClass="minidockfx-drag-sub-target" BorderPane.alignment="CENTER"/>
+
+            </bottom>
+        </BorderPane>
         <SplitPane fx:id="verticalSplit" dividerPositions="0.5" orientation="VERTICAL" styleClass="minidockfx-splitpane"
-                   AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                   AnchorPane.topAnchor="0.0">
+                   visible="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <items>
                 <AnchorPane fx:id="top">
                     <children>

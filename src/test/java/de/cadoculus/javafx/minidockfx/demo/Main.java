@@ -5,6 +5,7 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import de.cadoculus.javafx.minidockfx.MiniDockFXPane;
 import de.cadoculus.javafx.minidockfx.MiniDockTabPosition;
+import fr.brouillard.oss.cssfx.CSSFX;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -31,7 +32,7 @@ public class Main extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(MiniDockFXPane.class);
     // Simply the 200 line down on https://material.io/resources/color
-    public static final    String[] MATERIAL_DESIGN_COLORS = new String[]{
+    public static final String[] MATERIAL_DESIGN_COLORS = new String[]{
             "#ef9a9a", "#f48fb1", "#ce93d8", "#b39ddb", "#9fa8da",
             "#90caf9", "#81d4fa", "#80deea", "#80cbc4", "#a5d6a7",
             "#c5e1a5", "#e6ee9c", "#fff59d", "#ffe082", "#ffcc80",
@@ -42,6 +43,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        BorderPane root = new BorderPane();
+
         Button btn = new Button();
         btn.setText("Say 'Hello World'");
         btn.setOnAction(new EventHandler<ActionEvent>() {
@@ -52,7 +55,6 @@ public class Main extends Application {
             }
         });
 
-        BorderPane root = new BorderPane();
 
         MenuBar menubar = new MenuBar();
         root.setTop(menubar);
@@ -73,7 +75,6 @@ public class Main extends Application {
         Menu menu = new Menu("Tabs");
         menubar.getMenus().add(menu);
 
-
         for (MiniDockTabPosition pos : MiniDockTabPosition.values()) {
             if (MiniDockTabPosition.PREFERENCES == pos) {
                 continue;
@@ -88,7 +89,12 @@ public class Main extends Application {
         }
 
 
+
+
         Scene scene = new Scene(root, 600, 500);
+        scene.getStylesheets().add(MiniDockFXPane.class.getResource("minidockfx.css").toExternalForm());
+
+        CSSFX.start();
 
         primaryStage.setTitle("MiniDockFX Demo");
         primaryStage.setScene(scene);
@@ -107,8 +113,9 @@ public class Main extends Application {
         mdf.add(bottom, MiniDockTabPosition.BOTTOM);
 
     }
+
     private Color nextColor() {
-        String color = MATERIAL_DESIGN_COLORS[random.nextInt( MATERIAL_DESIGN_COLORS.length -1)];
+        String color = MATERIAL_DESIGN_COLORS[random.nextInt(MATERIAL_DESIGN_COLORS.length - 1)];
         return Color.web(color);
     }
 

@@ -3,6 +3,7 @@ package de.cadoculus.javafx.minidockfx;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.MouseEvent;
@@ -287,15 +288,6 @@ public class MiniDockFXPane {
         LOG.info("    {}/{} {}", event.getSceneX(), event.getSceneY(), event.getEventType());
         LOG.info("    {}/{} {}", dockPane.getLayoutX(), dockPane.getLayoutY(), dockPane.getLayoutBounds());
 
-
-        try {
-            final Transform localToSceneTransform = dockPane.getLocalToSceneTransform();
-            LOG.info("  i {}", localToSceneTransform.inverseTransform(event.getSceneX(), event.getSceneY()));
-        } catch (Exception exp) {
-            LOG.error("failed to apply conversion", exp);
-        }
-
-
         LOG.info("dockPane children {}", dockPane.getChildren());
 
         if (MouseEvent.DRAG_DETECTED == event.getEventType()) {
@@ -307,13 +299,36 @@ public class MiniDockFXPane {
             //     1. fallback position in the middle of the dock
             final Bounds dtBounds = dragTarget.getBoundsInLocal();
             final Bounds dkBounds = dockPane.getBoundsInLocal();
-            LOG.info("    bounds {} {}",dkBounds, dtBounds);
+            LOG.info("    bounds {} {}", dkBounds, dtBounds);
 
-            double lx = (dkBounds.getWidth() - dtBounds.getWidth())/2.0;
-            double ly = (dkBounds.getHeight() - dtBounds.getHeight())/2.0;
+            double lx = (dkBounds.getWidth() - dtBounds.getWidth()) / 2.0;
+            double ly = (dkBounds.getHeight() - dtBounds.getHeight()) / 2.0;
+
+            //    2. if possible better place in the vicinity of the mouse
+            try {
+                final Transform localToSceneTransform = dockPane.getLocalToSceneTransform();
+                final Point2D mouseInLocal = localToSceneTransform.inverseTransform(event.getSceneX(), event.getSceneY());
+                LOG.info("    mouse in local  {}", mouseInLocal);
+
+                // Horizontal
+                // place the drag target middle where the mouse it,
+                // but keep at lest 10px distance to the edge of the dock
+                lx = Math.max(10, mouseInLocal.getX() - dtBounds.getWidth() / 2.0);
+                lx = Math.min(lx, dkBounds.getWidth() - 10 - dtBounds.getWidth());
+
+                // Vertical
+                // place the drag target below the mouse unless there is not enough space
+                ly = mouseInLocal.getY() + 25;
+                if (( ly + dtBounds.getHeight() + 10 ) > dkBounds.getHeight()) {
+                    ly = mouseInLocal.getY() - 25 - dtBounds.getHeight();
+                }
+
+            } catch (Exception exp) {
+                LOG.warn("failed to apply conversion, use fallback postion", exp);
+            }
+
             dragTarget.setLayoutX(lx);
             dragTarget.setLayoutY(ly);
-
 
         } else if (MouseEvent.MOUSE_RELEASED == event.getEventType()) {
             dragTarget.setVisible(false);

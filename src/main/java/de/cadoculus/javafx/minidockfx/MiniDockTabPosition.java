@@ -8,7 +8,7 @@ import java.util.Locale;
  * by a user.
  */
 public enum MiniDockTabPosition {
-    PREFERENCES, LEFT, CENTER, RIGHT, BOTTOM;
+    LEFT, CENTER, RIGHT, BOTTOM;
 
     public static MiniDockTabPosition parseFromId(String id) {
         if (id == null || id.trim().length() == 0) {

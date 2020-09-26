@@ -1,24 +1,32 @@
 package de.cadoculus.javafx.minidockfx;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTabPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.geometry.Pos;
 import javafx.scene.control.Tab;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
 
+/**
+ * This is the controller for a single dock.
+ * From the UI side it is based on the layout defined in TabbedDock.fxml
+ */
 public class TabbedDockController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TabbedDockController.class);
     private MiniDockFXPane dock;
+    final ObservableList<AbstractTabableView> views = FXCollections.observableArrayList();
 
     @FXML
     private JFXTabPane tabPane;
@@ -27,9 +35,10 @@ public class TabbedDockController {
     public void initialize() {
     }
 
-    final ObservableList<AbstractTabbableView> views = FXCollections.observableArrayList();
-
-
+    /**
+     * This method is used to register the parent {@link MiniDockFXPane}
+     * @param dock the parent dock
+     */
     void setDock(MiniDockFXPane dock) {
         this.dock = dock;
         ListChangeListener lcl = change -> {
@@ -38,49 +47,69 @@ public class TabbedDockController {
         views.addListener(lcl);
     }
 
-    public void add(AbstractTabbableView view) {
+    /**
+     * Add a new view to this dock
+     * @param view the view to add
+     */
+    void add(AbstractTabableView view) {
 
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
 
+        // Create the header visible in the tab
+        HBox header = new HBox();
+        header.getStyleClass().add(MiniDockFXPane.TAB_HEADER_STYLE);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        // ... add the header content from the view itself
+        header.getChildren().add( view.getTab());
+
+        // ... add a button to close the tab
+        JFXButton closeButton = new JFXButton();
+        closeButton.getStyleClass().add(MiniDockFXPane.CLOSE_BUTTON_STYLE);
+        closeButton.visibleProperty().bind(view.closeable);
+        closeButton.setOnAction(actionEvent -> this.remove(view));
+        FontIcon icon = new FontIcon("fa-close");
+        closeButton.setGraphic(icon);
+        header.getChildren().add(closeButton);
+
+        // inform the view
         view.beforeAdding();
 
+        // add to tabbed pane
         Tab tab = new Tab();
         tab.setContent(view.getContent());
-        tab.setGraphic(view.getTab());
+        tab.setGraphic(header);
         tab.setUserData(view);
 
-        // try to find close button and add event handler
-        final Optional<Button> closeO = view.getTab().getChildren().stream().filter(c -> c instanceof Button).
-                map(Button.class::cast).
-                filter(c -> c.getStyleClass().contains(AbstractTabbableView.CLOSE_BUTTON_STYLE)).
-                findFirst();
-        if (closeO.isPresent()) {
-            closeO.get().setOnAction(actionEvent -> TabbedDockController.this.remove(view));
-        }
-
-
         tabPane.getTabs().add(tab);
-        view.afterAdding();
         views.add(view);
+
+        view.afterAdding();
+
 
         LOG.info("mouse listener {}", tab.getGraphic().getOnMousePressed());
 
-        // Add mouse event handlers for the source
+        // Add mouse event handlers for the drag source
         tab.getGraphic().setOnMousePressed(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
+                if ( ! view.moveable.get()) {
+                    event.consume();
+                    return;
+                }
+
                 tab.getGraphic().setMouseTransparent(true);
                 event.setDragDetect(true);
                 dock.dragStart(view, event);
             }
         });
 
-
         LOG.info("mouse listener' {}", tab.getGraphic().getOnMousePressed());
 
         tab.getGraphic().setOnMouseReleased(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
+
                 tab.getGraphic().setMouseTransparent(false);
                 dock.dragStart(view, event);
             }
@@ -101,7 +130,11 @@ public class TabbedDockController {
         });
     }
 
-    public void remove(AbstractTabbableView view) {
+    /**
+     * Remove a view from the dock
+     * @param view the view to remove
+     */
+    void remove(AbstractTabableView view) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
@@ -115,10 +148,13 @@ public class TabbedDockController {
         tabPane.getTabs().remove(first.get());
         view.afterClose();
         views.remove(view);
-
     }
 
-    public void raise(AbstractTabbableView view) {
+    /**
+     * Raise a view in the dock
+     * @param view the view to raise
+     */
+    void raise(AbstractTabableView view) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }

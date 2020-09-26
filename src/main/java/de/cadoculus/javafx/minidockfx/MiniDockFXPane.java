@@ -4,6 +4,7 @@ package de.cadoculus.javafx.minidockfx;
 import com.jfoenix.controls.JFXRippler;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
@@ -18,17 +19,46 @@ import javafx.util.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.prefs.Preferences;
 
-public class MiniDockFXPane {
+/**
+ * The MiniDockFXPane is a simple docking control.
+ * <p>
+ * It allows to add and remove individual views to different docking places and move them around.
+ * The dock places are called LEFT,CENTER,RIGHT,BOTTOM and are arranged as in the BorderLayout.
+ * Unless {@link AbstractTabableView#closeable} is false, it is possible to close views.
+ * Unless {@link AbstractTabableView#moveable} is false, it is possible to move views from one dock by another using dragging (left MB pressed).
+ * </p>
+ * <p>
+ * The views lifecycle is as follows:
+ * <ul>
+ *     <li>Create your view as extension of {@link AbstractTabableView} class. You need to provide the views content in the content variable.</li>
+ *     <li>Add the view for display using {@link MiniDockFXPane#add(AbstractTabableView, MiniDockTabPosition...)}.
+ *     If you provide no position is given, it will be placed to CENTER. If you give a dock position, it will be placed in that dock.
+ *     If you provide PREFERENCES and another value, it will be placed in the same place as stored in preferences
+ *     </li>
+ * </ul>
+ *
+ * </p>
+ */
+public class MiniDockFXPane extends AnchorPane {
+
+    public static final String VIEW_LABEL_STYLE = "minidockfx-view-label";
+    public static final String VIEW_BOX_STYLE = "minidockfx-view-box";
+    public static final String VIEW_LABEL_TT_STYLE = "minidockfx-view-label-tooltip";
+    public static final String CLOSE_BUTTON_STYLE = "minidockfx-tab-close";
+    public static final String TAB_HEADER_STYLE = "minidockfx-tab-header";
+    public static final String ACTIVE_DRAG_TRGT_STYLE = "minidockfx-drag-sub-target_active";
+    private static final String LAST_VERT_SPLIT_KEY = "lastVerticalSplit";
+    private static final String LAST_HOR_SPLIT0_KEY = "lastHorizontalSplit0";
+    private static final String LAST_HOR_SPLIT1_KEY = "lastHorizontalSplit1";
 
     private static final Logger LOG = LoggerFactory.getLogger(MiniDockFXPane.class);
 
-    public static final String ACTIVE_DRAG_TRGT = "minidockfx-drag-sub-target_active";
 
-    @FXML
-    private AnchorPane dockPane;
     @FXML
     private AnchorPane top;
     @FXML
@@ -65,15 +95,35 @@ public class MiniDockFXPane {
     @FXML
     private Label bottomDragTarget;
 
+    private final Preferences prefs = Preferences.userRoot().node(MiniDockFXPane.class.getName() + "." + getId());
+    private double lastVerticalSplit = prefs.getDouble(LAST_VERT_SPLIT_KEY, 2 / 3.0);
+    private double lastHorizontalSplit0 = prefs.getDouble(LAST_HOR_SPLIT0_KEY, 0.15);
+    private double lastHorizontalSplit1 = prefs.getDouble(LAST_VERT_SPLIT_KEY, 0.85);
 
-    private double lastVerticalSplit = 0.0;
-    private double lastHorizontalSplit0 = 0.15;
-    private double lastHorizontalSplit1 = 0.85;
+    private AbstractTabableView draggedView;
 
-    private AbstractTabbableView draggedView;
+    /**
+     * The default creator.
+     */
+    public MiniDockFXPane() {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("DefaultDock.fxml"));
+        fxmlLoader.setRoot(this);
+        fxmlLoader.setController(this);
+
+        try {
+            fxmlLoader.load();
+        } catch (IOException exception) {
+            LOG.error("an error occured loading components fxml", exception);
+            throw new RuntimeException(exception);
+        }
+
+    }
 
     @FXML
     public void initialize() {
+
+        LOG.error("initialize");
 
         leftController.setDock(this);
         centerController.setDock(this);
@@ -81,12 +131,8 @@ public class MiniDockFXPane {
         bottomController.setDock(this);
 
 
-        dockPane.widthProperty().addListener((v, o, n) -> {
-            sizeChanged();
-        });
-        dockPane.heightProperty().addListener((v, o, n) -> {
-            sizeChanged();
-        });
+        verticalSplit.setDividerPositions(lastVerticalSplit);
+        horizontalSplit.setDividerPositions(lastHorizontalSplit0, lastHorizontalSplit1);
 
         for (SplitPane.Divider divider : verticalSplit.getDividers()) {
             divider.positionProperty().addListener((v, o, n) -> dividersChanged());
@@ -112,7 +158,7 @@ public class MiniDockFXPane {
      * @param positions the desired positions. If no positon is given puts view to CENTER
      * @throws IllegalArgumentException in case of null view or if view was already added
      */
-    public void add(AbstractTabbableView view, MiniDockTabPosition... positions) {
+    public void add(AbstractTabableView view, MiniDockTabPosition... positions) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
@@ -140,9 +186,6 @@ public class MiniDockFXPane {
                     case BOTTOM:
                         pos = check;
                         break;
-                    case PREFERENCES:
-                        LOG.info("position preferences not implemented yet");
-                        continue;
                     default:
                         LOG.error("got unsupported position value {}", check);
                 }
@@ -175,7 +218,7 @@ public class MiniDockFXPane {
      * @param view the view to remove
      * @throws IllegalArgumentException in case of a null view or one which is not managed by the dock
      */
-    public void remove(AbstractTabbableView view) {
+    public void remove(AbstractTabableView view) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
@@ -199,15 +242,40 @@ public class MiniDockFXPane {
      * @param position the target position
      * @throws IllegalArgumentException in case of a null view or one which is not managed by the dock
      */
-    public void move(AbstractTabbableView view, MiniDockTabPosition position) {
+    public void move(AbstractTabableView view, MiniDockTabPosition position) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
-        remove(view);
-        add(view, position);
+        TabbedDockController tbc = null;
+        switch (position) {
+            case LEFT:
+                tbc = leftController;
+                break;
+            case CENTER:
+                tbc = centerController;
+                break;
+            case RIGHT:
+                tbc = rightController;
+                break;
+            case BOTTOM:
+                tbc = bottomController;
+                break;
+            default:
+                LOG.error("got unsupported position value {}, skip moving", position);
+                return;
+        }
+        if (tbc.views.contains(view)) {
+            // nothing to do
+        } else {
+            remove(view);
+            add(view, position);
+        }
     }
 
 
+    /**
+     * This is used in a listener and stores the position of the dividers in the preferences.
+     */
     private void dividersChanged() {
 
         double[] pos = verticalSplit.getDividerPositions();
@@ -221,43 +289,34 @@ public class MiniDockFXPane {
                 lastHorizontalSplit1 = pos[1];
             }
         }
-    }
-
-    private void sizeChanged() {
-
-        debugInfo("sizeChange");
-
-        // vertical split
-        if (verticalSplit.getItems().size() == 1) {
-            if (verticalSplit.getItems().contains(bottom)) {
-                verticalSplit.setDividerPositions(0.0);
-            } else {
-                verticalSplit.setDividerPositions(1.0);
-            }
-        }
-        debugInfo("finished sizeChange");
+        // store to preferences
+        prefs.putDouble(LAST_VERT_SPLIT_KEY, lastVerticalSplit);
+        prefs.putDouble(LAST_HOR_SPLIT0_KEY, lastHorizontalSplit0);
+        prefs.putDouble(LAST_HOR_SPLIT1_KEY, lastHorizontalSplit1);
 
     }
+
 
     private void debugInfo(String msg) {
 
-        LOG.info(msg);
-        LOG.info("left #{}, center #{}, right #{}, bottom #{}",
-                leftController.views.size(),
-                centerController.views.size(),
-                rightController.views.size(),
-                bottomController.views.size());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(msg);
+            LOG.debug("left #{}, center #{}, right #{}, bottom #{}",
+                    leftController.views.size(),
+                    centerController.views.size(),
+                    rightController.views.size(),
+                    bottomController.views.size());
 
-        LOG.info("verticalSplit {}", verticalSplit.getItems());
-        LOG.info("horizontalSplit {}", horizontalSplit.getItems());
+            LOG.debug("verticalSplit {}", verticalSplit.getItems());
+            LOG.debug("horizontalSplit {}", horizontalSplit.getItems());
 
-        LOG.info("horizontal {}, vertical {}",
-                Arrays.toString(horizontalSplit.getDividerPositions()),
-                Arrays.toString(verticalSplit.getDividerPositions()));
+            LOG.debug("horizontal {}, vertical {}",
+                    Arrays.toString(horizontalSplit.getDividerPositions()),
+                    Arrays.toString(verticalSplit.getDividerPositions()));
 
-        LOG.info("lastVerticalSplit {}", lastVerticalSplit);
-        LOG.info("lastHorizontal {} {}", lastHorizontalSplit0, lastHorizontalSplit1);
-
+            LOG.debug("lastVerticalSplit {}", lastVerticalSplit);
+            LOG.debug("lastHorizontal {} {}", lastHorizontalSplit0, lastHorizontalSplit1);
+        }
 
     }
 
@@ -265,13 +324,14 @@ public class MiniDockFXPane {
 
         debugInfo("updateLayout");
 
-        // check what subcontrols are needed
+        // check what sub controls are needed
         boolean needLeft = !leftController.views.isEmpty();
         boolean needCenter = !centerController.views.isEmpty();
         boolean needRight = !rightController.views.isEmpty();
         boolean needFirstRow = needLeft || needCenter || needRight;
         boolean needSecondRow = !bottomController.views.isEmpty();
 
+        // and calculate splitting positions
         double vpos = verticalSplit.getDividerPositions().length > 0 ? verticalSplit.getDividerPositions()[0] : 10;
         double tvpos = Math.min(lastVerticalSplit, vpos);
 
@@ -297,11 +357,15 @@ public class MiniDockFXPane {
         verticalSplit.setDividerPositions(tvpos);
 
         // Care about horizontal layout
+        // TODO: this is ugly and should be clean up
+        int numCurSplits = horizontalSplit.getItems().size() - 1;
+
         double hpos0 = horizontalSplit.getDividerPositions().length > 0 ? horizontalSplit.getDividerPositions()[0] : 10.0;
         double thpos0 = Math.min(hpos0, lastHorizontalSplit0);
         double hpos1 = horizontalSplit.getDividerPositions().length > 1 ? horizontalSplit.getDividerPositions()[1] : 10.0;
         double thpos1 = Math.max(thpos0, Math.min(hpos1, lastHorizontalSplit1));
 
+        // handle the docks them selves
         horizontalSplit.getItems().clear();
         if (needLeft) {
             horizontalSplit.getItems().add(left);
@@ -312,22 +376,41 @@ public class MiniDockFXPane {
         if (needRight) {
             horizontalSplit.getItems().add(right);
         }
+
+        // now calculate a usefull splitter position
         if (needLeft && needCenter && needRight) {
-            thpos0 = Math.min(thpos0, 0.1);
-            thpos0 = Math.max(thpos0, 1.0 / 3);
-            thpos1 = Math.min(thpos1, 2.0 / 3);
-            thpos1 = Math.max(thpos1, 0.9);
+            if (numCurSplits == 3) {
+                // keep values as is
+            } else {
+                thpos0 = lastHorizontalSplit0;
+                thpos0 = Math.min(thpos0, 0.1);
+                thpos0 = Math.max(thpos0, 1.0 / 3);
+                thpos1 = Math.min(thpos1, 2.0 / 3);
+                thpos1 = Math.max(thpos1, 0.9);
+            }
         } else if (needLeft && needCenter) {
-            thpos0 = Math.min(thpos0, 0.1);
-            thpos0 = Math.max(thpos0, 1.0 / 3);
-            thpos1 = 1.0;
+            if (numCurSplits == 1) {
+                // keep values as is
+            } else {
+                thpos0 = Math.min(thpos0, 0.1);
+                thpos0 = Math.max(thpos0, 1.0 / 3);
+                thpos1 = 1.0;
+            }
         } else if (needLeft && needRight) {
-            thpos0 = Math.min(thpos0, 1.0 / 3);
-            thpos0 = Math.max(thpos0, 2.0 / 3);
-            thpos1 = 1.0;
+            if (numCurSplits == 1) {
+                // keep values as is
+            } else {
+                thpos0 = Math.min(thpos0, 1.0 / 3);
+                thpos0 = Math.max(thpos0, 2.0 / 3);
+                thpos1 = 1.0;
+            }
         } else if (needCenter && needRight) {
-            thpos0 = Math.min(thpos0, 1.0 / 3);
-            thpos0 = Math.max(thpos0, 2.0 / 3);
+            if (numCurSplits == 1) {
+                // keep values as is
+            } else {
+                thpos0 = Math.min(thpos0, 1.0 / 3);
+                thpos0 = Math.max(thpos0, 2.0 / 3);
+            }
         } else {
             thpos0 = thpos1 = 1.0;
         }
@@ -346,15 +429,8 @@ public class MiniDockFXPane {
     }
 
 
-    void dragStart(AbstractTabbableView view, MouseEvent event) {
-
-//        LOG.info("dragPressed {}", view.name.get());
-//        LOG.info("    {}/{} {}", event.getSceneX(), event.getSceneY(), event.getEventType());
-//        LOG.info("    {}/{} {}", dockPane.getLayoutX(), dockPane.getLayoutY(), dockPane.getLayoutBounds());
-
+    void dragStart(AbstractTabableView view, MouseEvent event) {
         draggedView = view;
-
-//        LOG.info("dockPane children {}", dockPane.getChildren());
 
         if (MouseEvent.DRAG_DETECTED == event.getEventType()) {
 
@@ -362,12 +438,12 @@ public class MiniDockFXPane {
             dragTarget.setVisible(true);
             dragTarget.toFront();
 
-            dockPane.setCursor(Cursor.MOVE);
+            setCursor(Cursor.MOVE);
 
             // and position it in the vicinity of the mouse
             //     1. fallback position in the middle of the dock
             final Bounds dtBounds = dragTarget.getBoundsInLocal();
-            final Bounds dkBounds = dockPane.getBoundsInLocal();
+            final Bounds dkBounds = getBoundsInLocal();
             //LOG.info("    bounds {} {}", dkBounds, dtBounds);
 
             double lx = (dkBounds.getWidth() - dtBounds.getWidth()) / 2.0;
@@ -375,7 +451,7 @@ public class MiniDockFXPane {
 
             //    2. if possible better place in the vicinity of the mouse
             try {
-                final Transform localToSceneTransform = dockPane.getLocalToSceneTransform();
+                final Transform localToSceneTransform = getLocalToSceneTransform();
                 final Point2D mouseInLocal = localToSceneTransform.inverseTransform(event.getSceneX(), event.getSceneY());
 
                 // Horizontal
@@ -405,6 +481,37 @@ public class MiniDockFXPane {
         event.consume();
     }
 
+
+    private void dragEnd(Label trgt, MouseDragEvent mouseDragEvent) {
+        LOG.debug("dragEnd {} {}", trgt.getId(), mouseDragEvent.getEventType());
+
+        if (draggedView == null) {
+            LOG.error("something is wrong, got dragEnd, but have no draggedView value ???");
+            return;
+        }
+        if (MouseDragEvent.MOUSE_DRAG_ENTERED == mouseDragEvent.getEventType()) {
+            setCursor(Cursor.HAND);
+            trgt.getStyleClass().add(ACTIVE_DRAG_TRGT_STYLE);
+
+            if (trgt.getParent() instanceof JFXRippler) {
+                ((JFXRippler) trgt.getParent()).createManualRipple().run();
+            }
+
+        } else if (MouseDragEvent.MOUSE_DRAG_EXITED == mouseDragEvent.getEventType()) {
+            setCursor(Cursor.MOVE);
+            trgt.getStyleClass().remove(ACTIVE_DRAG_TRGT_STYLE);
+        } else if (MouseDragEvent.MOUSE_DRAG_RELEASED == mouseDragEvent.getEventType()) {
+            // we should move the source view
+            LOG.info("move view '{}' to {}", draggedView, trgt.getId());
+
+            trgt.getStyleClass().remove(ACTIVE_DRAG_TRGT_STYLE);
+            finishDragging();
+            move(draggedView, MiniDockTabPosition.parseFromId(trgt.getId()));
+            draggedView = null;
+        }
+        mouseDragEvent.consume();
+    }
+
     private void finishDragging() {
         // have a nice fade out for the drag target panel
         FadeTransition fade = new FadeTransition();
@@ -418,46 +525,13 @@ public class MiniDockFXPane {
             dragTarget.setVisible(false);
             dragTarget.toBack();
             dragTarget.setOpacity(1);
-            dockPane.setCursor(Cursor.DEFAULT);
+            setCursor(Cursor.DEFAULT);
         });
         fade.play();
 
+        setCursor(Cursor.DEFAULT);
 
-        dockPane.setCursor(Cursor.DEFAULT);
     }
-
-    private void dragEnd(Label trgt, MouseDragEvent mouseDragEvent) {
-        LOG.info("dragEnd {} {}", trgt.getId(), mouseDragEvent.getEventType());
-
-        if (draggedView == null) {
-            LOG.error("something is wrong, got dragEnd, but have no draggedView value ???");
-            return;
-        }
-        if (MouseDragEvent.MOUSE_DRAG_ENTERED == mouseDragEvent.getEventType()) {
-            dockPane.setCursor(Cursor.HAND);
-            trgt.getStyleClass().add(ACTIVE_DRAG_TRGT);
-
-            if (trgt.getParent() instanceof JFXRippler) {
-                ((JFXRippler) trgt.getParent()).createManualRipple().run();
-            }
-
-        } else if (MouseDragEvent.MOUSE_DRAG_EXITED == mouseDragEvent.getEventType()) {
-            dockPane.setCursor(Cursor.MOVE);
-            trgt.getStyleClass().remove(ACTIVE_DRAG_TRGT);
-        } else if (MouseDragEvent.MOUSE_DRAG_RELEASED == mouseDragEvent.getEventType()) {
-            // we should move the source view
-            LOG.info("move view '{}' to {}", draggedView, trgt.getId());
-
-            trgt.getStyleClass().remove(ACTIVE_DRAG_TRGT);
-            finishDragging();
-            move(draggedView, MiniDockTabPosition.parseFromId(trgt.getId()));
-        }
-
-
-        LOG.info("style on  {}: {}", trgt.getId(), trgt.getStyleClass());
-        mouseDragEvent.consume();
-    }
-
 
 }
 

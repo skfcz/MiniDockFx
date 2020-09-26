@@ -17,13 +17,9 @@
     -fx-font-size: 24px;
 }
 
-
-
-
 .minidockfx-pane {
     -fx-background-color: -mdf-background-color1;
 }
-
 
 .minidockfx-splitpane {
     -fx-background-color: -mdf-background-color1;
@@ -49,15 +45,24 @@
     -fx-background-color: transparent;
 }
 
-.minidockfx-tab-box {
+/* TabbedDockController: A HBox containing the node given from the view and the close button */
+.minidockfx-tab-header {
+    -fx-spacing: 5;
+}
+
+/* AbstractTabbableView: A HBox containing the label and potential other content */
+.minidockfx-view-box {
 
 }
-.minidockfx-tab-label {
+
+/* AbstractTabbableView: The label containing the views name */
+.minidockfx-view-label {
     -fx-text-fill: WHITE;
     -fx-max-width: 100px;
 }
 
-.minidockfx-tab-label-tooltip {
+/* AbstractTabbableView: A tooltip on the label containing the views name */
+.minidockfx-view-label-tooltip {
     -fx-background:-mdf-background-color0;
     -fx-background-color:-mdf-background-color0;
     -fx-border-color: -mdf-background-color2;
@@ -69,10 +74,11 @@
     -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.5) , 10, 0.0 , 0 , 3 );
     -fx-font-size: 16px;
 }
-.minidockfx-tab-label-tooltip  .label {
+.minidockfx-view-label-tooltip  .label {
     -fx-text-fill: black;
 }
 
+/* The close button in the tabs*/
 .minidockfx-tab-close {
     -jfx-button-type: FLAT;
     -fx-background-color: transparent;

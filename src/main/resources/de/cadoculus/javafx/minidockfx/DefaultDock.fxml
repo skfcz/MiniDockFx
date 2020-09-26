@@ -6,9 +6,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<AnchorPane fx:id="dockPane" maxHeight="Infinity" maxWidth="Infinity" minHeight="300" minWidth="400"
+<fx:root type="javafx.scene.layout.AnchorPane"  maxHeight="Infinity" maxWidth="Infinity" minHeight="300" minWidth="400"
             styleClass="minidockfx" stylesheets="@minidockfx.css" xmlns="http://javafx.com/javafx/11.0.1"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.cadoculus.javafx.minidockfx.MiniDockFXPane">
+            xmlns:fx="http://javafx.com/fxml/1" >
     <children>
         <BorderPane fx:id="dragTarget" prefHeight="150" prefWidth="200" styleClass="minidockfx-drag-target"
                     visible="true">
@@ -60,4 +60,4 @@
             </items>
         </SplitPane>
     </children>
-</AnchorPane>
+</fx:root>

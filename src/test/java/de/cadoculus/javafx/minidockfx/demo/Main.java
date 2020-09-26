@@ -60,36 +60,30 @@ public class Main extends Application {
         root.setTop(menubar);
 
 
-        final MiniDockFXPane mdf;
-        try {
-            FXMLLoader loader = new FXMLLoader(MiniDockFXPane.class.getResource("DefaultDock.fxml"));
-            AnchorPane ap = loader.load();
-            mdf = (MiniDockFXPane) loader.getController();
-
-            root.setCenter(ap);
-        } catch (Exception exp) {
-            LOG.error("failed to load fxml", exp);
-            throw new IllegalStateException("failed to load MiniDockFXPane");
-        }
+        final MiniDockFXPane mdf = new MiniDockFXPane();
+        root.setCenter(mdf);
+//        try {
+//            FXMLLoader loader = new FXMLLoader(MiniDockFXPane.class.getResource("DefaultDock.fxml"));
+//            AnchorPane ap = loader.load();
+//            mdf = (MiniDockFXPane) loader.getController();
+//
+//            root.setCenter(ap);
+//        } catch (Exception exp) {
+//            LOG.error("failed to load fxml", exp);
+//            throw new IllegalStateException("failed to load MiniDockFXPane");
+//        }
 
         Menu menu = new Menu("Tabs");
         menubar.getMenus().add(menu);
 
         for (MiniDockTabPosition pos : MiniDockTabPosition.values()) {
-            if (MiniDockTabPosition.PREFERENCES == pos) {
-                continue;
-            }
             MenuItem mi = new MenuItem("add to " + pos);
             menu.getItems().add(mi);
             mi.setOnAction(actionEvent -> {
-
-                ExampleTabview1 etv = new ExampleTabview1("Tab " + pos + " " + LocalTime.now(), nextColor());
+                ExampleTabview1 etv = new ExampleTabview1("Tab " + pos + " " + LocalTime.now(), pos.name(), nextColor());
                 mdf.add(etv, pos);
             });
         }
-
-
-
 
         Scene scene = new Scene(root, 600, 500);
         scene.getStylesheets().add(MiniDockFXPane.class.getResource("minidockfx.css").toExternalForm());
@@ -100,11 +94,11 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        final ExampleTabview1 left = new ExampleTabview1("left", nextColor());
-        final ExampleTabview1 left2 = new ExampleTabview1("left2", nextColor());
-        final ExampleTabview1 center = new ExampleTabview1("center", nextColor());
+        final ExampleTabview1 left = new ExampleTabview1("left", "left", nextColor());
+        final ExampleTabview1 left2 = new ExampleTabview1("left2", "left2", nextColor());
+        final ExampleTabview1 center = new ExampleTabview1("center", "center", nextColor());
 //        final ExampleTabview1 right = new ExampleTabview1("right");
-        final ExampleTabview1 bottom = new ExampleTabview1("bottom", nextColor());
+        final ExampleTabview1 bottom = new ExampleTabview1("bottom", "center", nextColor());
 //
         mdf.add(left, MiniDockTabPosition.LEFT);
         mdf.add(left2, MiniDockTabPosition.LEFT);

@@ -38,10 +38,11 @@ import java.util.Locale;
  * THe 'PREFERENCES' is for a later version to preserve the last choice
  * by a user.
  */
-public enum MiniDockTabPosition {
+public enum MiniDockViewPosition  {
     LEFT, CENTER, RIGHT, BOTTOM;
 
-    public static MiniDockTabPosition parseFromId(String id) {
+
+    public static MiniDockViewPosition parseFromId(String id) {
         if (id == null || id.trim().length() == 0) {
             return CENTER;
         }

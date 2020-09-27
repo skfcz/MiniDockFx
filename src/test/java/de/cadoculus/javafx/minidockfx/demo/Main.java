@@ -35,7 +35,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import de.cadoculus.javafx.minidockfx.MiniDockFXPane;
-import de.cadoculus.javafx.minidockfx.MiniDockTabPosition;
+import de.cadoculus.javafx.minidockfx.MiniDockViewPosition;
 import fr.brouillard.oss.cssfx.CSSFX;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -45,15 +45,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.fxml.FXMLLoader;
 
 import java.net.URL;
 import java.time.LocalTime;
@@ -107,7 +104,7 @@ public class Main extends Application {
         Menu menu = new Menu("Tabs");
         menubar.getMenus().add(menu);
 
-        for (MiniDockTabPosition pos : MiniDockTabPosition.values()) {
+        for (MiniDockViewPosition pos : MiniDockViewPosition.values()) {
             MenuItem mi = new MenuItem("add to " + pos);
             menu.getItems().add(mi);
             mi.setOnAction(actionEvent -> {
@@ -131,11 +128,11 @@ public class Main extends Application {
 //        final ExampleTabview1 right = new ExampleTabview1("right");
         final ExampleTabview1 bottom = new ExampleTabview1("bottom", "center", nextColor());
 //
-        mdf.add(left, MiniDockTabPosition.LEFT);
-        mdf.add(left2, MiniDockTabPosition.LEFT);
-        mdf.add(center, MiniDockTabPosition.CENTER);
+        mdf.add(left, MiniDockViewPosition.LEFT);
+        mdf.add(left2, MiniDockViewPosition.LEFT);
+        mdf.add(center, MiniDockViewPosition.CENTER);
 //        mdf.add(right, MiniDockTabPosition.RIGHT);
-        mdf.add(bottom, MiniDockTabPosition.BOTTOM);
+        mdf.add(bottom, MiniDockViewPosition.BOTTOM);
 
     }
 

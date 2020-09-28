@@ -320,27 +320,108 @@ public class MiniDockFXPane extends AnchorPane {
      */
     private void dividersChanged() {
 
-        double lastVerticalSplit = 1.0;
+        double vSplit = 1.0;
         double[] pos = verticalSplit.getDividerPositions();
         if (pos.length > 0) {
-            lastVerticalSplit = pos[0];
+            // ensure,that we have at least 50px
+
+            vSplit = pos[0];
         }
 
-        double lastHorizontalSplit0 = 1 / 4.0;
-        double lastHorizontalSplit1 = 3 / 4.0;
+        double hSplit0 = 0.0;
+        double hSplit1 = 1.0;
 
         pos = horizontalSplit.getDividerPositions();
         if (pos.length > 0) {
-            lastHorizontalSplit0 = pos[0];
+            hSplit0 = pos[0];
             if (pos.length > 1) {
-                lastHorizontalSplit1 = pos[1];
+                hSplit1 = pos[1];
             }
         }
+        final double height = getHeight();
+        final double width = getWidth();
+
+        // ensure we have at least 100 height and 200px width
+        final double minHeight = 100;
+        final double minWidth = 100;
+        if (verticalSplit.getItems().size() > 1) {
+            double h0 = vSplit * height;
+            double h1 = (1 - vSplit) * height;
+            LOG.info("v {}", h0, h1);
+            if (height < 2 * minHeight) {
+                // Split evenly
+                vSplit = 0.5;
+                verticalSplit.setDividerPositions(vSplit);
+            } else {
+                if (h0 < minHeight) {
+                    vSplit = minHeight / height;
+                    verticalSplit.setDividerPositions(vSplit);
+                } else if (h1 < minHeight) {
+                    vSplit = 1 - (minHeight / height);
+                    verticalSplit.setDividerPositions(vSplit);
+                } else {
+                    // nothing to do
+                }
+            }
+        }
+        if (horizontalSplit.getItems().size() > 1) {
+            double w0 = hSplit0 * width;
+            double w1 = (hSplit1 - hSplit0) * width;
+            double w2 = (1 - hSplit1) * width;
+            LOG.info("w {} {} {}", w0, w1, w2);
+
+            double minSplitD = minWidth / width;
+
+            if (horizontalSplit.getItems().size() == 2) {
+                if (width < 2 * minWidth) {
+                    // Split evenly
+                    hSplit0 = 0.5;
+
+                } else {
+                    if (w0 < minWidth) {
+                        hSplit0 = minSplitD;
+                    }
+
+                    if (w1 < minWidth) {
+                        hSplit0 = 1 - minSplitD;
+                    }
+                }
+                horizontalSplit.setDividerPositions(hSplit0);
+            } else if (horizontalSplit.getItems().size() == 3) {
+                if (width < 3 * minWidth) {
+                    // Split evenly
+                    hSplit0 = hSplit1 = 1 / 3.0;
+                } else {
+                    if (w0 < minWidth) {
+                        hSplit0 = minWidth / width;
+                    }
+                    w1 = (hSplit1 - hSplit0) * width;
+                    if (w1 < minWidth) {
+                        double curSplitD = hSplit1 - hSplit0;
+                        double deltaSplitD = (minSplitD - curSplitD) / 2.0;
+                        hSplit0 = Math.max(minSplitD, hSplit0 - deltaSplitD);
+                        curSplitD = hSplit1 - hSplit0;
+                        double remainingDeltaSplitD = (minSplitD - curSplitD);
+                        hSplit1 = Math.min(hSplit1, hSplit0 + remainingDeltaSplitD);
+                    }
+                    w2 = (1 - hSplit1) * width;
+                    if (w2 < minWidth) {
+                        hSplit1 = 1 - minSplitD;
+                    }
+                }
+                horizontalSplit.setDividerPositions(hSplit0, hSplit1);
+            }
+        }
+
+
         // store to preferences
-        double[] splits = {lastVerticalSplit, lastHorizontalSplit0, lastHorizontalSplit1};
+        double[] splits = {vSplit, hSplit0, hSplit1};
         prefs.put(currentDocks, Arrays.toString(splits));
 
-        //LOG.info("save split {} '{}'", currentDocks, prefs.get(currentDocks, ""));
+        LOG.info("current split {} {}", currentDocks, splits);
+
+
+        LOG.info("save split {} '{}'", currentDocks, prefs.get(currentDocks, ""));
     }
 
 

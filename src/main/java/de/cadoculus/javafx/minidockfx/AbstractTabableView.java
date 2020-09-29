@@ -89,6 +89,7 @@ public abstract class AbstractTabableView {
     /**
      * Get the part to be displayed in the tab,
      * e.g. the name, some toolicons ...
+     *
      */
     public Node getTab() {
         return tab;

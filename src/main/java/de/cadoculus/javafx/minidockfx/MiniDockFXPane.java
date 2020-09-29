@@ -70,6 +70,7 @@ import java.util.prefs.Preferences;
  * </p>
  * <p>
  * The views lifecycle is as follows:
+ * </p>
  * <ul>
  *     <li>Create your view as extension of {@link AbstractTabableView} class. You need to provide the views content in the content variable.</li>
  *     <li>Add the view for display using {@link MiniDockFXPane#add(AbstractTabableView, MiniDockViewPosition...)}.
@@ -77,8 +78,6 @@ import java.util.prefs.Preferences;
  *     If you provide PREFERENCES and another value, it will be placed in the same place as stored in preferences
  *     </li>
  * </ul>
- *
- * </p>
  */
 public class MiniDockFXPane extends AnchorPane {
 

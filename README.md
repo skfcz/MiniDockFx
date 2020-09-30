@@ -34,6 +34,11 @@ See [Main.java](src/test/java/de/cadoculus/javafx/minidockfx/demo/Main.java) as 
 * ikonli with fontawesome pack
 * slf4j
 
+
+## Maven Central 
+
+The sources, javadoc and jars are available on Maven Central:
+[Maven Central](https://oss.sonatype.org/#nexus-search;quick~minidockfx)
 ## License
 
 This code is under a  [BSD License](LICENSE), so feel free to use it without too many obligations :-)

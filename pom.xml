@@ -28,11 +28,11 @@
 
      <developers>
         <developer>
-            <id>skfczs</id>
+            <id>skfcz</id>
             <name>Carsten Zerbst</name>
             <email>carsten.zerbst@groy-groy.de</email>
             <organization>private</organization>
-            <organizationUrl>http://cadoculus.de</organizationUrl>            
+            <organizationUrl>http://www.groy-groy.de/czerbst</organizationUrl>
             <timezone>-1</timezone>
         </developer>
     </developers>

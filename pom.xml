@@ -26,6 +26,17 @@
         <tag>HEAD</tag>
     </scm>
 
+     <developers>
+        <developer>
+            <id>skfczs</id>
+            <name>Carsten Zerbst</name>
+            <email>carsten.zerbst@groy-groy.de</email>
+            <organization>private</organization>
+            <organizationUrl>http://cadoculus.de</organizationUrl>            
+            <timezone>-1</timezone>
+        </developer>
+    </developers>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>

@@ -32,7 +32,7 @@
 package de.cadoculus.javafx.minidockfx.demo;
 
 import com.jfoenix.controls.JFXCheckBox;
-import de.cadoculus.javafx.minidockfx.AbstractTabableView;
+import de.cadoculus.javafx.minidockfx.AbstractDockableView;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
@@ -43,9 +43,9 @@ import javafx.scene.paint.Stop;
 
 
 /**
- * THis is just an example to show what it is possible with the AbstractTabbableView.
+ * This is just an example to show what it is possible with the AbstractTabbableView.
  */
-public class ExampleTabview1 extends AbstractTabableView {
+public class ExampleTabview1 extends AbstractDockableView {
 
 
     public ExampleTabview1(String name, String id, Color color) {

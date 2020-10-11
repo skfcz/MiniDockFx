@@ -57,7 +57,7 @@ public class TabbedDockController {
 
     private static final Logger LOG = LoggerFactory.getLogger(TabbedDockController.class);
     private MiniDockFXPane dock;
-    final ObservableList<AbstractTabableView> views = FXCollections.observableArrayList();
+    final ObservableList<DockableView> views = FXCollections.observableArrayList();
 
     @FXML
     private JFXTabPane tabPane;
@@ -82,7 +82,7 @@ public class TabbedDockController {
      * Add a new view to this dock
      * @param view the view to add
      */
-    void add(AbstractTabableView view) {
+    void add(DockableView view) {
 
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
@@ -99,7 +99,7 @@ public class TabbedDockController {
         // ... add a button to close the tab
         JFXButton closeButton = new JFXButton();
         closeButton.getStyleClass().add(MiniDockFXPane.CLOSE_BUTTON_STYLE);
-        closeButton.visibleProperty().bind(view.closeable);
+        closeButton.visibleProperty().bind(view.closeable());
         closeButton.setOnAction(actionEvent -> this.remove(view));
         FontIcon icon = new FontIcon("fa-close");
         closeButton.setGraphic(icon);
@@ -125,7 +125,7 @@ public class TabbedDockController {
         // Add mouse event handlers for the drag source
         tab.getGraphic().setOnMousePressed(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
-                if ( ! view.moveable.get()) {
+                if ( ! view.moveable().get()) {
                     event.consume();
                     return;
                 }
@@ -165,7 +165,7 @@ public class TabbedDockController {
      * Remove a view from the dock
      * @param view the view to remove
      */
-    void remove(AbstractTabableView view) {
+    void remove(DockableView view) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
@@ -182,10 +182,17 @@ public class TabbedDockController {
     }
 
     /**
+     * Checks if this controller contains the given view
+     */
+    boolean contains( DockableView view) {
+        return tabPane.getTabs().stream().anyMatch(tab -> view.equals(tab.getUserData()));
+    }
+
+    /**
      * Raise a view in the dock
      * @param view the view to raise
      */
-    void raise(AbstractTabableView view) {
+    void raise(DockableView view) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }

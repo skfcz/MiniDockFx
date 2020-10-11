@@ -34,9 +34,6 @@ package de.cadoculus.javafx.minidockfx;
 
 import com.jfoenix.controls.JFXRippler;
 import javafx.animation.FadeTransition;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -65,15 +62,15 @@ import java.util.prefs.Preferences;
  * <p>
  * It allows to add and remove individual views to different docking places and move them around.
  * The dock places are called LEFT,CENTER,RIGHT,BOTTOM and are arranged as in the BorderLayout.
- * Unless {@link AbstractTabableView#closeable} is false, it is possible to close views.
- * Unless {@link AbstractTabableView#moveable} is false, it is possible to move views from one dock by another using dragging (left MB pressed).
+ * Unless {@link DockableView#closeable} is false, it is possible to close views.
+ * Unless {@link DockableView#moveable} is false, it is possible to move views from one dock by another using dragging (left MB pressed).
  * </p>
  * <p>
  * The views lifecycle is as follows:
  * </p>
  * <ul>
- *     <li>Create your view as extension of {@link AbstractTabableView} class. You need to provide the views content in the content variable.</li>
- *     <li>Add the view for display using {@link MiniDockFXPane#add(AbstractTabableView, MiniDockViewPosition...)}.
+ *     <li>Create your view as extension of {@link AbstractDockableView} class. You need to provide the views content in the content variable.</li>
+ *     <li>Add the view for display using {@link MiniDockFXPane#add(DockableView, MiniDockViewPosition...)}.
  *     If you provide no position is given, it will be placed to CENTER. If you give a dock position, it will be placed in that dock.
  *     If you provide PREFERENCES and another value, it will be placed in the same place as stored in preferences
  *     </li>
@@ -143,8 +140,10 @@ public class MiniDockFXPane extends AnchorPane {
     private Label bottomDragTarget;
 
     private final Preferences prefs = Preferences.userRoot().node(MiniDockFXPane.class.getName() + "." + getId());
-    private AbstractTabableView draggedView;
+    private DockableView draggedView;
     private String currentDocks = "";
+
+    private TabbedDockController[] controllers;
 
     /**
      * The default creator.
@@ -175,6 +174,8 @@ public class MiniDockFXPane extends AnchorPane {
         rightController.setDock(this);
         bottomController.setDock(this);
 
+        controllers = new TabbedDockController[]{leftController, centerController, rightController, bottomController};
+
         for (SplitPane.Divider divider : verticalSplit.getDividers()) {
             divider.positionProperty().addListener((v, o, n) -> dividersChanged());
         }
@@ -199,7 +200,7 @@ public class MiniDockFXPane extends AnchorPane {
      * @param positions the desired positions. If no positon is given puts view to CENTER
      * @throws IllegalArgumentException in case of null view or if view was already added
      */
-    public void add(AbstractTabableView view, MiniDockViewPosition... positions) {
+    public void add(DockableView view, MiniDockViewPosition... positions) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
@@ -259,7 +260,7 @@ public class MiniDockFXPane extends AnchorPane {
      * @param view the view to remove
      * @throws IllegalArgumentException in case of a null view or one which is not managed by the dock
      */
-    public void remove(AbstractTabableView view) {
+    public void remove(DockableView view) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
@@ -283,7 +284,7 @@ public class MiniDockFXPane extends AnchorPane {
      * @param position the target position
      * @throws IllegalArgumentException in case of a null view or one which is not managed by the dock
      */
-    public void move(AbstractTabableView view, MiniDockViewPosition position) {
+    public void move(DockableView view, MiniDockViewPosition position) {
         if (view == null) {
             throw new IllegalArgumentException("expect none null view");
         }
@@ -313,6 +314,17 @@ public class MiniDockFXPane extends AnchorPane {
         }
     }
 
+
+    /**
+     * Raise the given view
+     */
+    public void raise(DockableView view) {
+        for (TabbedDockController ctrl : controllers) {
+            if (ctrl.contains(view)) {
+                ctrl.raise(view);
+            }
+        }
+    }
 
     /**
      * This is used in a listener and stores the position of the dividers in the preferences.
@@ -582,7 +594,7 @@ public class MiniDockFXPane extends AnchorPane {
     /**
      * Called in all kind of drag start events. See mouse listener in {@link de.cadoculus.javafx.minidockfx.TabbedDockController}
      */
-    void dragStart(AbstractTabableView view, MouseEvent event) {
+    void dragStart(DockableView view, MouseEvent event) {
         draggedView = view;
 
         if (MouseEvent.DRAG_DETECTED == event.getEventType()) {

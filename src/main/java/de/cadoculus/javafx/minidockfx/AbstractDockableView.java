@@ -45,13 +45,12 @@ import javafx.scene.layout.Region;
 /**
  * This is the base class to be extended for views
  */
-public abstract class AbstractTabableView {
+public abstract class AbstractDockableView implements DockableView {
 
     protected final StringProperty name = new SimpleStringProperty();
     protected final HBox tab;
     protected final BooleanProperty closeable = new SimpleBooleanProperty();
     protected final BooleanProperty moveable = new SimpleBooleanProperty();
-    protected final BooleanProperty docked = new SimpleBooleanProperty();
     protected final String id;
     protected Region content;
 
@@ -63,7 +62,7 @@ public abstract class AbstractTabableView {
      * @param canClose true if the view is closeable. If false no button is added to the tab.
      * @param canMove  true if the view is moveable. If false it is not possible to move the tab
      */
-    protected AbstractTabableView(String name, String id, boolean canClose, boolean canMove) {
+    protected AbstractDockableView(String name, String id, boolean canClose, boolean canMove) {
 
         this.id = id;
         this.name.setValue(name);
@@ -86,15 +85,25 @@ public abstract class AbstractTabableView {
         label.setTooltip(tooltip);
     }
 
+    public BooleanProperty closeable() {
+        return closeable;
+    }
+
+    public BooleanProperty moveable() {
+        return moveable;
+    }
+
     /**
      * Get the part to be displayed in the tab,
-     * e.g. the name, some toolicons ...
+     * e.g. the name, some tool icons ...
      *
      */
+    @Override
     public Node getTab() {
         return tab;
     }
 
+    @Override
     public Region getContent() {
         return content;
     }
@@ -103,6 +112,7 @@ public abstract class AbstractTabableView {
      * This method is called before a view is added.
      * You could override it if you need that information.
      */
+    @Override
     public void beforeAdding() {
 
     }
@@ -111,6 +121,7 @@ public abstract class AbstractTabableView {
      * This method is called after a view was added.
      * You could override it if you need that information.
      */
+    @Override
     public void afterAdding() {
 
     }
@@ -119,6 +130,7 @@ public abstract class AbstractTabableView {
      * This method is called before a view is added.
      * You could override it if you need that information.
      */
+    @Override
     public void beforeClose() {
 
     }
@@ -127,6 +139,7 @@ public abstract class AbstractTabableView {
      * This method is called after a view was added.
      * You could override it if you need that information.
      */
+    @Override
     public void afterClose() {
 
     }

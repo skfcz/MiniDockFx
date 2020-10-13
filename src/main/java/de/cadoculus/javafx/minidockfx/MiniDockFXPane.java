@@ -606,7 +606,9 @@ LOG.info("locale {}", Locale.getDefault());
     void dragStart(DockableView view, MouseEvent event) {
         draggedView = view;
 
-        if (MouseEvent.DRAG_DETECTED == event.getEventType()) {
+        LOG.info("dragStart {}", event.getEventType());
+
+        if (MouseEvent.MOUSE_PRESSED == event.getEventType()) {
 
             // make the drag target visible
             dragTarget.setVisible(true);
@@ -713,5 +715,9 @@ LOG.info("locale {}", Locale.getDefault());
 
     }
 
+    void maximize(TabbedDockController tabbedDockController) {
+        LOG.info("maximize {}", tabbedDockController);
+
+    }
 }
 

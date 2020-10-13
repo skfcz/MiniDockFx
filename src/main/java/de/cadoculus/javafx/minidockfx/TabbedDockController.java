@@ -33,6 +33,7 @@ package de.cadoculus.javafx.minidockfx;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTabPane;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -43,7 +44,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
-import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -54,6 +54,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -65,9 +68,19 @@ public class TabbedDockController {
     private static final Logger LOG = LoggerFactory.getLogger(TabbedDockController.class);
     private MiniDockFXPane dock;
     final ObservableList<DockableView> views = FXCollections.observableArrayList();
+    private final ScheduledThreadPoolExecutor executor;
+    private ScheduledFuture<?> scheduledFuture;
+    private boolean dragFlag;
+
 
     @FXML
     private JFXTabPane tabPane;
+
+    public TabbedDockController() {
+        executor = new ScheduledThreadPoolExecutor(1);
+        executor.setRemoveOnCancelPolicy(true);
+    }
+
 
     @FXML
     public void initialize() {
@@ -140,57 +153,81 @@ public class TabbedDockController {
         LOG.info("mouse listener {}", tab.getGraphic().getOnMousePressed());
 
         // Add mouse event handlers for the drag source
-        tab.getGraphic().setOnMousePressed(new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) {
-                if (!event.isPrimaryButtonDown()) {
-                    return;
+        tab.getGraphic().setOnMousePressed(event -> {
+            if (!event.isPrimaryButtonDown()) {
+                return;
+            }
+            if (!view.moveable().get()) {
+                event.consume();
+                return;
+            }
+            // Due to whatever reasons this does not work in
+            // delayed #singlePressAction
+            tab.getGraphic().setMouseTransparent(true);
+            event.setDragDetect(true);
+
+            if (event.getClickCount() == 1) {
+                // we start a  future, if there is no mouse relase with 500 milliseconds
+                // the dock target is shown
+                scheduledFuture = executor.schedule(() -> singlePressAction(view, tab, event), 500, TimeUnit.MILLISECONDS);
+            } else if (event.getClickCount() > 1) {
+                // if we have a scheduled future we remove it
+                if (scheduledFuture != null && !scheduledFuture.isCancelled() && !scheduledFuture.isDone()) {
+                    scheduledFuture.cancel(false);
                 }
-
-
-                if (!view.moveable().get()) {
-                    event.consume();
-                    return;
-                }
-
-                tab.getGraphic().setMouseTransparent(true);
-                event.setDragDetect(true);
-                dock.dragStart(view, event);
-
+                // and start
+                dock.maximize(this);
             }
         });
 
-        tab.getGraphic().setOnMouseReleased(new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) {
-                if (MouseButton.PRIMARY != event.getButton()) {
-                    return;
-                }
-
-                tab.getGraphic().setMouseTransparent(false);
-                dock.dragStart(view, event);
-
+        tab.getGraphic().setOnMouseReleased(event -> {
+            if (MouseButton.PRIMARY != event.getButton()) {
+                return;
             }
+            // if we have a running future we stop this
+            if (scheduledFuture != null && !scheduledFuture.isCancelled() && !scheduledFuture.isDone()) {
+                scheduledFuture.cancel(false);
+            }
+
+            tab.getGraphic().setMouseTransparent(false);
+            if (dragFlag) {
+                dock.dragStart(view, event);
+            }
+            dragFlag = false;
         });
 
-        tab.getGraphic().setOnMouseDragged(new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) {
-                if (MouseButton.PRIMARY != event.getButton()) {
-                    return;
-                }
-
+        tab.getGraphic().setOnMouseDragged(event -> {
+            if (MouseButton.PRIMARY != event.getButton()) {
+                return;
+            }
+            if (dragFlag) {
                 event.setDragDetect(false);
                 dock.dragStart(view, event);
             }
         });
 
-        tab.getGraphic().setOnDragDetected(new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) {
-                if (MouseButton.PRIMARY != event.getButton()) {
-                    return;
-                }
+        tab.getGraphic().setOnDragDetected(event -> {
+            if (MouseButton.PRIMARY != event.getButton()) {
+                return;
+            }
 
-                tab.getGraphic().startFullDrag();
+            tab.getGraphic().startFullDrag();
+            if (dragFlag) {
                 dock.dragStart(view, event);
             }
+        });
+    }
+
+    // this is called with a delay to allow double click counting
+    private void singlePressAction(DockableView view, Tab tab, MouseEvent event) {
+        Platform.runLater(() -> {
+            if (!view.moveable().get()) {
+                event.consume();
+                return;
+            }
+            dragFlag = true;
+            tab.getGraphic().setMouseTransparent(true);
+            dock.dragStart(view, event);
         });
     }
 
@@ -231,7 +268,7 @@ public class TabbedDockController {
             mi = new MenuItem(dock.getResourceBundle().getString("label_close_all_to_right"));
             mi.setOnAction(actionEvent -> {
                 final List<DockableView> toTheRight = new ArrayList<>(views.subList(pos + 1, views.size()));
-                LOG.info("right {}", toTheRight );
+                LOG.info("right {}", toTheRight);
                 for (DockableView cview : toTheRight) {
                     remove(cview);
                 }
@@ -268,6 +305,9 @@ public class TabbedDockController {
      * Checks if this controller contains the given view
      */
     boolean contains(DockableView view) {
+        if (view == null) {
+            throw new IllegalArgumentException("expect none null view");
+        }
         return tabPane.getTabs().stream().anyMatch(tab -> view.equals(tab.getUserData()));
     }
 

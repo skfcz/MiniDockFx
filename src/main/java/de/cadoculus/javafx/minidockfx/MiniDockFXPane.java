@@ -154,6 +154,7 @@ public class MiniDockFXPane extends AnchorPane {
      * The default creator.
      */
     public MiniDockFXPane() {
+        LOG.info("construct");
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("DefaultDock.fxml"));
         fxmlLoader.setRoot(this);
@@ -169,6 +170,7 @@ public class MiniDockFXPane extends AnchorPane {
         LOG.info("locale {}", Locale.getDefault());
         bundle = ResourceBundle.getBundle("de/cadoculus/javafx/minidockfx/messages", Locale.getDefault(), MiniDockFXPane.class.getClassLoader());
 
+        LOG.info("bundle {}", bundle);
 
     }
 
@@ -198,6 +200,7 @@ public class MiniDockFXPane extends AnchorPane {
             trgt.setOnMouseDragReleased(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
             trgt.setOnMouseDragExited(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
         }
+        LOG.info("bundle {}", bundle);
 
     }
 
@@ -278,12 +281,24 @@ public class MiniDockFXPane extends AnchorPane {
         }
         if (leftController.views.contains(view)) {
             leftController.remove(view);
+            if ( leftController.equals(maximisedController) && leftController.views.isEmpty()) {
+                maximize(leftController);
+            }
         } else if (centerController.views.contains(view)) {
             centerController.remove(view);
+            if ( centerController.equals(maximisedController) && centerController.views.isEmpty()) {
+                maximize(centerController);
+            }
         } else if (rightController.views.contains(view)) {
             rightController.remove(view);
+            if ( rightController.equals(maximisedController) && rightController.views.isEmpty()) {
+                maximize(rightController);
+            }
         } else if (bottomController.views.contains(view)) {
             bottomController.remove(view);
+            if ( bottomController.equals(maximisedController) && bottomController.views.isEmpty()) {
+                maximize(bottomController);
+            }
         } else {
             throw new IllegalArgumentException("view " + view + " is not managed in docking panel");
         }
@@ -626,6 +641,10 @@ public class MiniDockFXPane extends AnchorPane {
         LOG.info("dragStart {}", event.getEventType());
 
         if (MouseEvent.MOUSE_PRESSED == event.getEventType()) {
+            leftDragTarget.setText(bundle.getString("label_left"));
+            centerDragTarget.setText(bundle.getString("label_center"));
+            rightDragTarget.setText(bundle.getString("label_right"));
+            bottomDragTarget.setText(bundle.getString("label_bottom"));
 
             // make the drag target visible
             dragTarget.setVisible(true);
@@ -642,6 +661,8 @@ public class MiniDockFXPane extends AnchorPane {
             double lx = (dkBounds.getWidth() - dtBounds.getWidth()) / 2.0;
             double ly = (dkBounds.getHeight() - dtBounds.getHeight()) / 2.0;
 
+            double dy = 50;
+
             //    2. if possible better place in the vicinity of the mouse
             try {
                 final Transform localToSceneTransform = getLocalToSceneTransform();
@@ -655,9 +676,9 @@ public class MiniDockFXPane extends AnchorPane {
 
                 // Vertical
                 // place the drag target below the mouse unless there is not enough space
-                ly = mouseInLocal.getY() + 30;
-                if ((ly + dtBounds.getHeight() + 30) > dkBounds.getHeight()) {
-                    ly = mouseInLocal.getY() - 30 - dtBounds.getHeight();
+                ly = mouseInLocal.getY() + dy;
+                if ((ly + dtBounds.getHeight() +dy) > dkBounds.getHeight()) {
+                    ly = mouseInLocal.getY() - dy - dtBounds.getHeight();
                 }
 
             } catch (Exception exp) {
@@ -735,6 +756,7 @@ public class MiniDockFXPane extends AnchorPane {
 
     /**
      * Get the maximised controller
+     *
      * @return the controller or null
      */
     TabbedDockController getMaximisedController() {
@@ -764,4 +786,5 @@ public class MiniDockFXPane extends AnchorPane {
         updateLayout();
     }
 }
+
 

@@ -121,6 +121,21 @@
     -jfx-rippler-fill: #ef6c00;
 }
 
+.minidockfx-context-menu {
+    -fx-background: darkgray ;
+    -fx-text-fill: black;
+}
+
+.minidockfx-context-menu .label {
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-padding: 12.0px;
+}
+
+.minidockfx-context-menu:focused .label {
+    -fx-background-color: -mdf-background-color2;
+    -fx-text-fill: white;
+}
 /*
 * The following styles are just for the example code
  */

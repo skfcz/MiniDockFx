@@ -10,7 +10,12 @@ This docking component provides the following capabilities:
 * has a fixed layout with 4 docking areas (left, center,right, bottom)
 * each docking area is a JFXTabbedPane
 * users could move the tabs by dragging them onto a small screen element showing possible docking areas
-* users could close the tabs
+* users could close the tabs using the button
+* users could close the tabs using a context menu with the entries
+    * Close
+    * Close All
+    * Close All to Left/Right
+* users could maximise / unmaximise a dock using the context menu or double click 
 * split positions are stored in java.util.Preferences  
 
 The implementation is pretty simple, it is just four classes and two fxml files.
@@ -34,6 +39,9 @@ See [Main.java](src/test/java/de/cadoculus/javafx/minidockfx/demo/Main.java) as 
 * ikonli with fontawesome pack
 * slf4j
 
+## I18N
+The context Menu has some I18N support, the resource bundle contains a default bundle in English ( still british :-), 
+French and German.
 
 ## Maven Central 
 

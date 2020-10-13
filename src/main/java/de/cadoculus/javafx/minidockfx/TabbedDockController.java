@@ -122,13 +122,14 @@ public class TabbedDockController {
         JFXButton closeButton = new JFXButton();
         closeButton.getStyleClass().add(MiniDockFXPane.CLOSE_BUTTON_STYLE);
         closeButton.visibleProperty().bind(view.closeable());
-        closeButton.setOnAction(actionEvent -> this.remove(view));
+        closeButton.setOnAction(actionEvent -> dock.remove(view));
         FontIcon icon = new FontIcon("fa-close");
         closeButton.setGraphic(icon);
         header.getChildren().add(closeButton);
 
         // ... add a context menu
         ContextMenu menu = new ContextMenu();
+        menu.getStyleClass().add("minidockfx-context-menu");
         menu.getItems().add(new MenuItem("dummy"));
         menu.setOnShowing(windowEvent -> {
             updateMenu(menu, view);
@@ -238,16 +239,19 @@ public class TabbedDockController {
         menu.getItems().clear();
 
         MenuItem mi = new MenuItem(dock.getResourceBundle().getString("label_close"));
-        mi.setOnAction(actionEvent -> remove(view));
+        mi.setOnAction(actionEvent -> dock.remove(view));
         menu.getItems().add(mi);
 
-        mi = new MenuItem(dock.getResourceBundle().getString("label_close_all"));
-        mi.setOnAction(actionEvent -> {
-            for (DockableView cview : views) {
-                remove(cview);
-            }
-        });
-        menu.getItems().add(mi);
+        if (views.size() > 1) {
+            mi = new MenuItem(dock.getResourceBundle().getString("label_close_all"));
+            mi.setOnAction(actionEvent -> {
+                final List<DockableView> allViews = new ArrayList<>(views);
+                for (DockableView cview : allViews) {
+                    dock.remove(cview);
+                }
+            });
+            menu.getItems().add(mi);
+        }
 
         int pos = views.indexOf(view);
 
@@ -256,7 +260,7 @@ public class TabbedDockController {
             mi.setOnAction(actionEvent -> {
                 final List<DockableView> toTheLeft = new ArrayList<>(views.subList(0, pos));
                 for (DockableView cview : toTheLeft) {
-                    remove(cview);
+                    dock.remove(cview);
                 }
             });
             menu.getItems().add(mi);
@@ -267,7 +271,7 @@ public class TabbedDockController {
                 final List<DockableView> toTheRight = new ArrayList<>(views.subList(pos + 1, views.size()));
                 LOG.info("right {}", toTheRight);
                 for (DockableView cview : toTheRight) {
-                    remove(cview);
+                    dock.remove(cview);
                 }
             });
             menu.getItems().add(mi);

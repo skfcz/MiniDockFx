@@ -149,10 +149,7 @@ public class TabbedDockController {
 
         view.afterAdding();
 
-
-        LOG.info("mouse listener {}", tab.getGraphic().getOnMousePressed());
-
-        // Add mouse event handlers for the drag source
+        // Add mouse event handlers for dragging and maximising
         tab.getGraphic().setOnMousePressed(event -> {
             if (!event.isPrimaryButtonDown()) {
                 return;
@@ -253,7 +250,7 @@ public class TabbedDockController {
         menu.getItems().add(mi);
 
         int pos = views.indexOf(view);
-        LOG.info("pos {}/{}", pos, views.size());
+
         if (pos > 0) {
             mi = new MenuItem(dock.getResourceBundle().getString("label_close_all_to_left"));
             mi.setOnAction(actionEvent -> {
@@ -276,6 +273,11 @@ public class TabbedDockController {
             menu.getItems().add(mi);
         }
         menu.getItems().add(new SeparatorMenuItem());
+
+        mi = new MenuItem(dock.getResourceBundle().getString(
+                this.equals(dock.getMaximisedController()) ? "label_unmaximize" : "label_maximize"));
+        mi.setOnAction(actionEvent -> dock.maximize(this));
+        menu.getItems().add(mi);
 
 
     }

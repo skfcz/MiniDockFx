@@ -128,6 +128,7 @@ public class MiniDockFXPane extends AnchorPane {
     @FXML
     private TabbedDockController bottomController;
 
+
     @FXML
     private BorderPane dragTarget;
     @FXML
@@ -146,6 +147,8 @@ public class MiniDockFXPane extends AnchorPane {
     private TabbedDockController[] controllers;
 
     private ResourceBundle bundle;
+    private AnchorPane maximisedView;
+    private TabbedDockController maximisedController;
 
     /**
      * The default creator.
@@ -163,7 +166,7 @@ public class MiniDockFXPane extends AnchorPane {
             throw new RuntimeException(exception);
         }
 
-LOG.info("locale {}", Locale.getDefault());
+        LOG.info("locale {}", Locale.getDefault());
         bundle = ResourceBundle.getBundle("de/cadoculus/javafx/minidockfx/messages", Locale.getDefault(), MiniDockFXPane.class.getClassLoader());
 
 
@@ -457,18 +460,19 @@ LOG.info("locale {}", Locale.getDefault());
 
             LOG.debug("verticalSplit {}", verticalSplit.getItems());
             LOG.debug("horizontalSplit {}", horizontalSplit.getItems());
-
+            LOG.debug("maximizedController {}", maximisedController);
         }
 
     }
 
     void updateLayout() {
 
-        debugInfo("updateLayout");
+        debugInfo("updateLayout ");
 
         final String currentDockName = currentDocks;
 
         // check what sub controls are needed
+
         List<MiniDockViewPosition> nextDockEnums = new ArrayList<>();
         boolean needLeft = false;
         if (!leftController.views.isEmpty()) {
@@ -492,9 +496,15 @@ LOG.info("locale {}", Locale.getDefault());
             nextDockEnums.add(MiniDockViewPosition.BOTTOM);
         }
         nextDockEnums.sort(Comparator.naturalOrder());
-        final String nextDocksName = nextDockEnums.toString();
+        boolean needMaximised = false;
 
-        //LOG.info("currentDock {}, nextDocks {}", currentDockName, nextDocksName);
+        // override for the maximised case
+        if (maximisedController != null) {
+            needMaximised = true;
+            needFirstRow = needSecondRow = needLeft = needCenter = needRight = false;
+        }
+
+        final String nextDocksName = needMaximised ? "maximised" : nextDockEnums.toString();
 
         if (currentDocks.equals(nextDocksName)) {
             // no update of layout needed
@@ -508,6 +518,13 @@ LOG.info("locale {}", Locale.getDefault());
 
         // Care about layout
         verticalSplit.getItems().clear();
+
+        if (needMaximised) {
+            verticalSplit.getItems().add(maximisedView);
+            verticalSplit.setDividerPositions(1.0);
+            return;
+        }
+
         if (needFirstRow) {
             verticalSplit.getItems().add(top);
         }
@@ -715,9 +732,36 @@ LOG.info("locale {}", Locale.getDefault());
 
     }
 
-    void maximize(TabbedDockController tabbedDockController) {
-        LOG.info("maximize {}", tabbedDockController);
 
+    /**
+     * Get the maximised controller
+     * @return the controller or null
+     */
+    TabbedDockController getMaximisedController() {
+        return maximisedController;
+    }
+
+    /**
+     * THis is called to maximize / unmaximize a single dock
+     *
+     * @param tabbedDockController
+     */
+    void maximize(TabbedDockController tabbedDockController) {
+
+        maximisedController = maximisedController == tabbedDockController ? null : tabbedDockController;
+        if (leftController.equals(maximisedController)) {
+            maximisedView = left;
+        } else if (centerController.equals(maximisedController)) {
+            maximisedView = center;
+        } else if (rightController.equals(maximisedController)) {
+            maximisedView = center;
+        } else if (bottomController.equals(maximisedController)) {
+            maximisedView = center;
+        } else {
+            maximisedView = null;
+        }
+
+        updateLayout();
     }
 }
 

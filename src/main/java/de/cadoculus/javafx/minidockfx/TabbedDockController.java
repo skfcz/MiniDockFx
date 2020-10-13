@@ -39,7 +39,11 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -47,6 +51,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -107,6 +113,14 @@ public class TabbedDockController {
         FontIcon icon = new FontIcon("fa-close");
         closeButton.setGraphic(icon);
         header.getChildren().add(closeButton);
+
+        // ... add a context menu
+        ContextMenu menu = new ContextMenu();
+        menu.getItems().add(new MenuItem("dummy"));
+        menu.setOnShowing(windowEvent -> {
+            updateMenu(menu, view);
+        });
+        header.setOnContextMenuRequested(contextMenuEvent -> menu.show(header, contextMenuEvent.getScreenX(), contextMenuEvent.getScreenY()));
 
         // inform the view
         view.beforeAdding();
@@ -178,6 +192,55 @@ public class TabbedDockController {
                 dock.dragStart(view, event);
             }
         });
+    }
+
+    /**
+     * This is called when opening the context menu and updates the visible menu items
+     *
+     * @param menu the menu to update
+     * @param view the view for which to work
+     */
+    private void updateMenu(ContextMenu menu, DockableView view) {
+        menu.getItems().clear();
+
+        MenuItem mi = new MenuItem(dock.getResourceBundle().getString("label_close"));
+        mi.setOnAction(actionEvent -> remove(view));
+        menu.getItems().add(mi);
+
+        mi = new MenuItem(dock.getResourceBundle().getString("label_close_all"));
+        mi.setOnAction(actionEvent -> {
+            for (DockableView cview : views) {
+                remove(cview);
+            }
+        });
+        menu.getItems().add(mi);
+
+        int pos = views.indexOf(view);
+        LOG.info("pos {}/{}", pos, views.size());
+        if (pos > 0) {
+            mi = new MenuItem(dock.getResourceBundle().getString("label_close_all_to_left"));
+            mi.setOnAction(actionEvent -> {
+                final List<DockableView> toTheLeft = new ArrayList<>(views.subList(0, pos));
+                for (DockableView cview : toTheLeft) {
+                    remove(cview);
+                }
+            });
+            menu.getItems().add(mi);
+        }
+        if (pos != (views.size() - 1)) {
+            mi = new MenuItem(dock.getResourceBundle().getString("label_close_all_to_right"));
+            mi.setOnAction(actionEvent -> {
+                final List<DockableView> toTheRight = new ArrayList<>(views.subList(pos + 1, views.size()));
+                LOG.info("right {}", toTheRight );
+                for (DockableView cview : toTheRight) {
+                    remove(cview);
+                }
+            });
+            menu.getItems().add(mi);
+        }
+        menu.getItems().add(new SeparatorMenuItem());
+
+
     }
 
     /**

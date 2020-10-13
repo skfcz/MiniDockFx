@@ -145,6 +145,8 @@ public class MiniDockFXPane extends AnchorPane {
 
     private TabbedDockController[] controllers;
 
+    private ResourceBundle bundle;
+
     /**
      * The default creator.
      */
@@ -160,6 +162,10 @@ public class MiniDockFXPane extends AnchorPane {
             LOG.error("an error occured loading components fxml", exception);
             throw new RuntimeException(exception);
         }
+
+LOG.info("locale {}", Locale.getDefault());
+        bundle = ResourceBundle.getBundle("de/cadoculus/javafx/minidockfx/messages", Locale.getDefault(), MiniDockFXPane.class.getClassLoader());
+
 
     }
 
@@ -192,6 +198,9 @@ public class MiniDockFXPane extends AnchorPane {
 
     }
 
+    ResourceBundle getResourceBundle() {
+        return bundle;
+    }
 
     /**
      * Add a view to the docking panel

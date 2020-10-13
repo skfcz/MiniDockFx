@@ -654,7 +654,7 @@ public class MiniDockFXPane extends AnchorPane {
         LOG.debug("dragEnd {} {}", trgt.getId(), mouseDragEvent.getEventType());
 
         if (draggedView == null) {
-            LOG.error("something is wrong, got dragEnd, but have no draggedView value ???");
+            //LOG.error("something is wrong, got dragEnd, but have no draggedView value ???");
             return;
         }
         if (MouseDragEvent.MOUSE_DRAG_ENTERED == mouseDragEvent.getEventType()) {

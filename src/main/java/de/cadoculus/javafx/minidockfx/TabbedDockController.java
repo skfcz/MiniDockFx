@@ -40,6 +40,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Tab;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -68,6 +69,7 @@ public class TabbedDockController {
 
     /**
      * This method is used to register the parent {@link MiniDockFXPane}
+     *
      * @param dock the parent dock
      */
     void setDock(MiniDockFXPane dock) {
@@ -80,6 +82,7 @@ public class TabbedDockController {
 
     /**
      * Add a new view to this dock
+     *
      * @param view the view to add
      */
     void add(DockableView view) {
@@ -94,7 +97,7 @@ public class TabbedDockController {
         header.setAlignment(Pos.CENTER_LEFT);
 
         // ... add the header content from the view itself
-        header.getChildren().add( view.getTab());
+        header.getChildren().add(view.getTab());
 
         // ... add a button to close the tab
         JFXButton closeButton = new JFXButton();
@@ -125,7 +128,12 @@ public class TabbedDockController {
         // Add mouse event handlers for the drag source
         tab.getGraphic().setOnMousePressed(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
-                if ( ! view.moveable().get()) {
+                if (!event.isPrimaryButtonDown()) {
+                    return;
+                }
+
+
+                if (!view.moveable().get()) {
                     event.consume();
                     return;
                 }
@@ -133,21 +141,28 @@ public class TabbedDockController {
                 tab.getGraphic().setMouseTransparent(true);
                 event.setDragDetect(true);
                 dock.dragStart(view, event);
+
             }
         });
 
-        LOG.info("mouse listener' {}", tab.getGraphic().getOnMousePressed());
-
         tab.getGraphic().setOnMouseReleased(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
+                if (MouseButton.PRIMARY != event.getButton()) {
+                    return;
+                }
 
                 tab.getGraphic().setMouseTransparent(false);
                 dock.dragStart(view, event);
+
             }
         });
 
         tab.getGraphic().setOnMouseDragged(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
+                if (MouseButton.PRIMARY != event.getButton()) {
+                    return;
+                }
+
                 event.setDragDetect(false);
                 dock.dragStart(view, event);
             }
@@ -155,6 +170,10 @@ public class TabbedDockController {
 
         tab.getGraphic().setOnDragDetected(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
+                if (MouseButton.PRIMARY != event.getButton()) {
+                    return;
+                }
+
                 tab.getGraphic().startFullDrag();
                 dock.dragStart(view, event);
             }
@@ -163,6 +182,7 @@ public class TabbedDockController {
 
     /**
      * Remove a view from the dock
+     *
      * @param view the view to remove
      */
     void remove(DockableView view) {
@@ -184,12 +204,13 @@ public class TabbedDockController {
     /**
      * Checks if this controller contains the given view
      */
-    boolean contains( DockableView view) {
+    boolean contains(DockableView view) {
         return tabPane.getTabs().stream().anyMatch(tab -> view.equals(tab.getUserData()));
     }
 
     /**
      * Raise a view in the dock
+     *
      * @param view the view to raise
      */
     void raise(DockableView view) {

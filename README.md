@@ -29,6 +29,7 @@ Styling is possible using CSS, there are no hardcoded values.
    * the Node you want to display
 2. Instantiate a MiniDockFXPane
 3. Add the views to the dock pane
+4. Add the styling to your CSS. An example CSS file is found in src/test/resources/de/cadoculus/javafx/minidockfx/minidockfx.css
 
 See [Main.java](src/test/java/de/cadoculus/javafx/minidockfx/demo/Main.java) as example how to use the docking area,
 [ExampleTabview1](src/test/java/de/cadoculus/javafx/minidockfx/demo/ExampleTabview1.java) as example how to implement a view.

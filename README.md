@@ -34,6 +34,21 @@ Styling is possible using CSS, there are no hardcoded values.
 See [Main.java](src/test/java/de/cadoculus/javafx/minidockfx/demo/Main.java) as example how to use the docking area,
 [ExampleTabview1](src/test/java/de/cadoculus/javafx/minidockfx/demo/ExampleTabview1.java) as example how to implement a view.
 
+If you want to add local actions to your tab, you could add the buttons to the HBox containing the label. 
+Example code
+```java
+public ExampleTabview1(String name, String id, Color color) {
+    super(name, id, true, true );
+
+    HBox  hbox = (HBox) super.getTab();
+    JFXButton but = new JFXButton();
+    ...       
+    hbox.getChildren().add( but);
+
+```
+
+
+
 ## Dependencies
 * javafx
 * jfoenix

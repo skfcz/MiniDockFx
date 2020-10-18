@@ -31,15 +31,21 @@
  */
 package de.cadoculus.javafx.minidockfx.demo;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.behavior.JFXGenericPickerBehavior;
 import de.cadoculus.javafx.minidockfx.AbstractDockableView;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
+import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.util.Random;
 
 
 /**
@@ -47,9 +53,28 @@ import javafx.scene.paint.Stop;
  */
 public class ExampleTabview1 extends AbstractDockableView {
 
+    private final static Random RANDOM = new Random(20201018l);
 
     public ExampleTabview1(String name, String id, Color color) {
         super(name, id, true, true );
+
+        HBox  hbox = (HBox) super.getTab();
+
+        JFXButton but = new JFXButton();
+        but.setOnAction( actionEvent -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Information");
+            alert.setHeaderText("Pressed Bug");
+            alert.setContentText("Pressed local button on " + name );
+
+            alert.showAndWait();
+        } );
+        but.getStyleClass().add("exampleview-button");
+        FontIcon icon = new FontIcon("fa-bug");
+        but.setGraphic(icon);
+        but.setDisable(RANDOM.nextBoolean());
+        hbox.getChildren().add( but);
+
         content = new BorderPane();
 
         content.getStyleClass().add("ExampleView1");

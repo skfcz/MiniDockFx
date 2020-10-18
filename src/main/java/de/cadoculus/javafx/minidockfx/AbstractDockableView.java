@@ -36,7 +36,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
@@ -99,7 +98,7 @@ public abstract class AbstractDockableView implements DockableView {
      *
      */
     @Override
-    public Node getTab() {
+    public Region getTab() {
         return tab;
     }
 

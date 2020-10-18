@@ -40,13 +40,12 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.Tab;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +121,7 @@ public class TabbedDockController {
         JFXButton closeButton = new JFXButton();
         closeButton.getStyleClass().add(MiniDockFXPane.CLOSE_BUTTON_STYLE);
         closeButton.visibleProperty().bind(view.closeable());
+        closeButton.managedProperty().bind(view.closeable());
         closeButton.setOnAction(actionEvent -> dock.remove(view));
         FontIcon icon = new FontIcon("fa-close");
         closeButton.setGraphic(icon);
@@ -150,8 +150,10 @@ public class TabbedDockController {
 
         view.afterAdding();
 
+        Region mouseArea = view.getTab();
+
         // Add mouse event handlers for dragging and maximising
-        tab.getGraphic().setOnMousePressed(event -> {
+        mouseArea.setOnMousePressed(event -> {
             if (!event.isPrimaryButtonDown()) {
                 return;
             }
@@ -161,7 +163,7 @@ public class TabbedDockController {
             }
             // Due to whatever reasons this does not work in
             // delayed #singlePressAction
-            tab.getGraphic().setMouseTransparent(true);
+            mouseArea.setMouseTransparent(true);
             event.setDragDetect(true);
 
             if (event.getClickCount() == 1) {
@@ -178,7 +180,7 @@ public class TabbedDockController {
             }
         });
 
-        tab.getGraphic().setOnMouseReleased(event -> {
+        mouseArea.setOnMouseReleased(event -> {
             if (MouseButton.PRIMARY != event.getButton()) {
                 return;
             }
@@ -187,14 +189,14 @@ public class TabbedDockController {
                 scheduledFuture.cancel(false);
             }
 
-            tab.getGraphic().setMouseTransparent(false);
+            mouseArea.setMouseTransparent(false);
             if (dragFlag) {
                 dock.dragStart(view, event);
             }
             dragFlag = false;
         });
 
-        tab.getGraphic().setOnMouseDragged(event -> {
+        mouseArea.setOnMouseDragged(event -> {
             if (MouseButton.PRIMARY != event.getButton()) {
                 return;
             }
@@ -204,12 +206,12 @@ public class TabbedDockController {
             }
         });
 
-        tab.getGraphic().setOnDragDetected(event -> {
+        mouseArea.setOnDragDetected(event -> {
             if (MouseButton.PRIMARY != event.getButton()) {
                 return;
             }
 
-            tab.getGraphic().startFullDrag();
+            mouseArea.startFullDrag();
             if (dragFlag) {
                 dock.dragStart(view, event);
             }

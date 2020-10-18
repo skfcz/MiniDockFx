@@ -36,7 +36,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.Region;
 
 public interface DockableView {
-    Node getTab();
+    Region getTab();
 
     Region getContent();
 

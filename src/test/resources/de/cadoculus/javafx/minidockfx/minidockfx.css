@@ -184,3 +184,8 @@
 ExampleTabview1 {
     -mdf-background-colorA1: grey;
 }
+
+.exampleview-button .ikonli-font-icon {
+    -fx-fill: WHITE;
+    -fx-icon-size: 24px;
+}

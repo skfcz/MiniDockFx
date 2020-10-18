@@ -154,8 +154,6 @@ public class MiniDockFXPane extends AnchorPane {
      * The default creator.
      */
     public MiniDockFXPane() {
-        LOG.info("construct");
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("DefaultDock.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -167,18 +165,13 @@ public class MiniDockFXPane extends AnchorPane {
             throw new RuntimeException(exception);
         }
 
-        LOG.info("locale {}", Locale.getDefault());
         bundle = ResourceBundle.getBundle("de/cadoculus/javafx/minidockfx/messages", Locale.getDefault(), MiniDockFXPane.class.getClassLoader());
-
-        LOG.info("bundle {}", bundle);
 
     }
 
 
     @FXML
     public void initialize() {
-
-        LOG.error("initialize");
 
         leftController.setDock(this);
         centerController.setDock(this);
@@ -200,13 +193,10 @@ public class MiniDockFXPane extends AnchorPane {
             trgt.setOnMouseDragReleased(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
             trgt.setOnMouseDragExited(mouseDragEvent -> dragEnd(trgt, mouseDragEvent));
         }
-        LOG.info("bundle {}", bundle);
 
     }
 
-    ResourceBundle getResourceBundle() {
-        return bundle;
-    }
+
 
     /**
      * Add a view to the docking panel
@@ -234,8 +224,7 @@ public class MiniDockFXPane extends AnchorPane {
 
         MiniDockViewPosition pos = MiniDockViewPosition.CENTER;
         if (positions != null) {
-            for (int i = 0; i < positions.length; i++) {
-                MiniDockViewPosition check = positions[i];
+            for (MiniDockViewPosition check : positions) {
                 switch (check) {
                     case LEFT:
                     case CENTER:
@@ -281,22 +270,22 @@ public class MiniDockFXPane extends AnchorPane {
         }
         if (leftController.views.contains(view)) {
             leftController.remove(view);
-            if ( leftController.equals(maximisedController) && leftController.views.isEmpty()) {
+            if (leftController.equals(maximisedController) && leftController.views.isEmpty()) {
                 maximize(leftController);
             }
         } else if (centerController.views.contains(view)) {
             centerController.remove(view);
-            if ( centerController.equals(maximisedController) && centerController.views.isEmpty()) {
+            if (centerController.equals(maximisedController) && centerController.views.isEmpty()) {
                 maximize(centerController);
             }
         } else if (rightController.views.contains(view)) {
             rightController.remove(view);
-            if ( rightController.equals(maximisedController) && rightController.views.isEmpty()) {
+            if (rightController.equals(maximisedController) && rightController.views.isEmpty()) {
                 maximize(rightController);
             }
         } else if (bottomController.views.contains(view)) {
             bottomController.remove(view);
-            if ( bottomController.equals(maximisedController) && bottomController.views.isEmpty()) {
+            if (bottomController.equals(maximisedController) && bottomController.views.isEmpty()) {
                 maximize(bottomController);
             }
         } else {
@@ -354,6 +343,14 @@ public class MiniDockFXPane extends AnchorPane {
     }
 
     /**
+     * Get the ressourece bundle to translate messages
+     * @return the bundle
+     */
+    ResourceBundle getResourceBundle() {
+        return bundle;
+    }
+
+    /**
      * This is used in a listener and stores the position of the dividers in the preferences.
      */
     private void dividersChanged() {
@@ -385,7 +382,7 @@ public class MiniDockFXPane extends AnchorPane {
         if (verticalSplit.getItems().size() > 1) {
             double h0 = vSplit * height;
             double h1 = (1 - vSplit) * height;
-            LOG.info("v {}", h0, h1);
+            LOG.info("v {} {}", h0, h1);
             if (height < 2 * minHeight) {
                 // Split evenly
                 vSplit = 0.5;
@@ -663,7 +660,7 @@ public class MiniDockFXPane extends AnchorPane {
 
             double dy = 50;
 
-            //    2. if possible better place in the vicinity of the mouse
+            // 2. if possible better place in the vicinity of the mouse
             try {
                 final Transform localToSceneTransform = getLocalToSceneTransform();
                 final Point2D mouseInLocal = localToSceneTransform.inverseTransform(event.getSceneX(), event.getSceneY());
@@ -677,7 +674,7 @@ public class MiniDockFXPane extends AnchorPane {
                 // Vertical
                 // place the drag target below the mouse unless there is not enough space
                 ly = mouseInLocal.getY() + dy;
-                if ((ly + dtBounds.getHeight() +dy) > dkBounds.getHeight()) {
+                if ((ly + dtBounds.getHeight() + dy) > dkBounds.getHeight()) {
                     ly = mouseInLocal.getY() - dy - dtBounds.getHeight();
                 }
 
@@ -766,7 +763,7 @@ public class MiniDockFXPane extends AnchorPane {
     /**
      * THis is called to maximize / unmaximize a single dock
      *
-     * @param tabbedDockController
+     * @param tabbedDockController the controller to maximise
      */
     void maximize(TabbedDockController tabbedDockController) {
 
@@ -776,9 +773,9 @@ public class MiniDockFXPane extends AnchorPane {
         } else if (centerController.equals(maximisedController)) {
             maximisedView = center;
         } else if (rightController.equals(maximisedController)) {
-            maximisedView = center;
+            maximisedView = right;
         } else if (bottomController.equals(maximisedController)) {
-            maximisedView = center;
+            maximisedView = bottom;
         } else {
             maximisedView = null;
         }

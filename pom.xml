@@ -4,7 +4,7 @@
 
     <groupId>de.cadoculus.javafx</groupId>
     <artifactId>MiniDockFx</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5-SNAPSHOT</version>
 
     <name>MiniDockFX</name>
     <description>A small docking framework for JavaFX.</description>
@@ -23,7 +23,7 @@
         <url>https://github.com/skfcz/MiniDockFx</url>
         <connection>scm:git:git://github.com/skfcz/MiniDockFx.git</connection>
         <developerConnection>scm:git:git@github.com/skfcz/MiniDockFx.git</developerConnection>
-        <tag>MiniDockFx-0.1.4</tag>
+        <tag>HEAD</tag>
     </scm>
 
      <developers>

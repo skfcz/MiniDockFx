@@ -161,7 +161,7 @@ public class MiniDockFXPane extends AnchorPane {
         try {
             fxmlLoader.load();
         } catch (IOException exception) {
-            LOG.error("an error occured loading components fxml", exception);
+            LOG.error("an error occurred loading components fxml", exception);
             throw new RuntimeException(exception);
         }
 
@@ -196,7 +196,9 @@ public class MiniDockFXPane extends AnchorPane {
 
     }
 
-
+    ResourceBundle getResourceBundle() {
+        return bundle;
+    }
 
     /**
      * Add a view to the docking panel
@@ -343,14 +345,6 @@ public class MiniDockFXPane extends AnchorPane {
     }
 
     /**
-     * Get the ressourece bundle to translate messages
-     * @return the bundle
-     */
-    ResourceBundle getResourceBundle() {
-        return bundle;
-    }
-
-    /**
      * This is used in a listener and stores the position of the dividers in the preferences.
      */
     private void dividersChanged() {
@@ -382,7 +376,7 @@ public class MiniDockFXPane extends AnchorPane {
         if (verticalSplit.getItems().size() > 1) {
             double h0 = vSplit * height;
             double h1 = (1 - vSplit) * height;
-            LOG.info("v {} {}", h0, h1);
+            LOG.debug("v {} {}", h0, h1);
             if (height < 2 * minHeight) {
                 // Split evenly
                 vSplit = 0.5;
@@ -403,7 +397,7 @@ public class MiniDockFXPane extends AnchorPane {
             double w0 = hSplit0 * width;
             double w1 = (hSplit1 - hSplit0) * width;
             double w2 = (1 - hSplit1) * width;
-            LOG.info("w {} {} {}", w0, w1, w2);
+            LOG.debug("w {} {} {}", w0, w1, w2);
 
             double minSplitD = minWidth / width;
 
@@ -453,10 +447,10 @@ public class MiniDockFXPane extends AnchorPane {
         double[] splits = {vSplit, hSplit0, hSplit1};
         prefs.put(currentDocks, Arrays.toString(splits));
 
-        LOG.info("current split {} {}", currentDocks, splits);
+        LOG.debug("current split {} {}", currentDocks, splits);
 
 
-        LOG.info("save split {} '{}'", currentDocks, prefs.get(currentDocks, ""));
+        LOG.debug("save split {} '{}'", currentDocks, prefs.get(currentDocks, ""));
     }
 
 
@@ -623,7 +617,7 @@ public class MiniDockFXPane extends AnchorPane {
                 retval = DEFAULTS_SPLITS[i];
             }
         }
-        //LOG.info("loadSplitFromPrefs {} {}", nextDocksName, Arrays.toString(retval));
+        //LOG.debug("loadSplitFromPrefs {} {}", nextDocksName, Arrays.toString(retval));
 
         return retval;
     }
@@ -635,7 +629,7 @@ public class MiniDockFXPane extends AnchorPane {
     void dragStart(DockableView view, MouseEvent event) {
         draggedView = view;
 
-        LOG.info("dragStart {}", event.getEventType());
+        LOG.debug("dragStart {}", event.getEventType());
 
         if (MouseEvent.MOUSE_PRESSED == event.getEventType()) {
             leftDragTarget.setText(bundle.getString("label_left"));
@@ -653,7 +647,7 @@ public class MiniDockFXPane extends AnchorPane {
             //     1. fallback position in the middle of the dock
             final Bounds dtBounds = dragTarget.getBoundsInLocal();
             final Bounds dkBounds = getBoundsInLocal();
-            //LOG.info("    bounds {} {}", dkBounds, dtBounds);
+            //LOG.debug("    bounds {} {}", dkBounds, dtBounds);
 
             double lx = (dkBounds.getWidth() - dtBounds.getWidth()) / 2.0;
             double ly = (dkBounds.getHeight() - dtBounds.getHeight()) / 2.0;
@@ -763,7 +757,7 @@ public class MiniDockFXPane extends AnchorPane {
     /**
      * THis is called to maximize / unmaximize a single dock
      *
-     * @param tabbedDockController the controller to maximise
+     * @param tabbedDockController the controller to maximize
      */
     void maximize(TabbedDockController tabbedDockController) {
 

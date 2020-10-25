@@ -150,7 +150,7 @@ public class TabbedDockController {
 
         view.afterAdding();
 
-        Region mouseArea = view.getTab();
+        Node mouseArea = tab.getGraphic();
 
         // Add mouse event handlers for dragging and maximising
         mouseArea.setOnMousePressed(event -> {
@@ -240,12 +240,14 @@ public class TabbedDockController {
     private void updateMenu(ContextMenu menu, DockableView view) {
         menu.getItems().clear();
 
-        MenuItem mi = new MenuItem(dock.getResourceBundle().getString("label_close"));
-        mi.setOnAction(actionEvent -> dock.remove(view));
-        menu.getItems().add(mi);
+        if (view.closeable().get()) {
+            MenuItem mi = new MenuItem(dock.getResourceBundle().getString("label_close"));
+            mi.setOnAction(actionEvent -> dock.remove(view));
+            menu.getItems().add(mi);
+        }
 
         if (views.size() > 1) {
-            mi = new MenuItem(dock.getResourceBundle().getString("label_close_all"));
+            MenuItem mi = new MenuItem(dock.getResourceBundle().getString("label_close_all"));
             mi.setOnAction(actionEvent -> {
                 final List<DockableView> allViews = new ArrayList<>(views);
                 for (DockableView cview : allViews) {
@@ -258,7 +260,7 @@ public class TabbedDockController {
         int pos = views.indexOf(view);
 
         if (pos > 0) {
-            mi = new MenuItem(dock.getResourceBundle().getString("label_close_all_to_left"));
+            MenuItem mi = new MenuItem(dock.getResourceBundle().getString("label_close_all_to_left"));
             mi.setOnAction(actionEvent -> {
                 final List<DockableView> toTheLeft = new ArrayList<>(views.subList(0, pos));
                 for (DockableView cview : toTheLeft) {
@@ -268,7 +270,7 @@ public class TabbedDockController {
             menu.getItems().add(mi);
         }
         if (pos != (views.size() - 1)) {
-            mi = new MenuItem(dock.getResourceBundle().getString("label_close_all_to_right"));
+            MenuItem mi = new MenuItem(dock.getResourceBundle().getString("label_close_all_to_right"));
             mi.setOnAction(actionEvent -> {
                 final List<DockableView> toTheRight = new ArrayList<>(views.subList(pos + 1, views.size()));
                 LOG.info("right {}", toTheRight);
@@ -280,7 +282,7 @@ public class TabbedDockController {
         }
         menu.getItems().add(new SeparatorMenuItem());
 
-        mi = new MenuItem(dock.getResourceBundle().getString(
+        MenuItem mi = new MenuItem(dock.getResourceBundle().getString(
                 this.equals(dock.getMaximisedController()) ? "label_unmaximize" : "label_maximize"));
         mi.setOnAction(actionEvent -> dock.maximize(this));
         menu.getItems().add(mi);
